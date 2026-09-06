@@ -97,6 +97,23 @@ spin_stop(){
 # Homebrew already bit us once by hanging silently mid-install with only a
 # spinner on screen; every blocking Homebrew call below is wrapped in this
 # rather than trusting it to finish.
+# --- private per-run log directory -------------------------------------
+# These logs used to be hardcoded as $LEON_LOGDIR/pip.log, $LEON_LOGDIR/venv.log,
+# etc. Predictable, unprefixed paths in a world-writable sticky directory
+# are two bugs at once:
+#   1. The SECOND account on a machine cannot install. The first run's files
+#      are owned by the first user, and on any kernel with
+#      fs.protected_regular=2 (default on modern distros) the redirect is
+#      refused with "Permission denied" — even for root. The install then
+#      dies reporting "pip install failed", which is not what happened, so
+#      the owner debugs the wrong thing.
+#   2. Anyone on the box can pre-place a symlink at that name and have the
+#      installer write through it as whoever is installing.
+# Both disappear by writing into a private directory made fresh per run.
+LEON_LOGDIR="$(mktemp -d 2>/dev/null || echo "${TMPDIR:-/tmp}/.sabr-logs-$$")"
+mkdir -p "$LEON_LOGDIR" 2>/dev/null || true
+chmod 700 "$LEON_LOGDIR" 2>/dev/null || true
+
 run_timeout(){
   local secs="$1"; shift
   # A killed multi-step script (Homebrew's install.sh is one) can still run
@@ -170,7 +187,7 @@ ARCH="$(uname -m)"
 # tarball would only prove the payload arrived intact from whoever sent
 # it, which is not the same as proving we sent it. Written by
 # build_release.sh — never edit by hand, and never fetch it at runtime.
-EXPECTED_RELEASE_SHA256="b9946169d17b26ee46bfebf9b83d963a62ae31aa612921aebdcd969130830cbb"
+EXPECTED_RELEASE_SHA256="064b05b2f24db893615670f3a22701b79aaea7a82c30d2b17bd41672f8914074"
 
 # -- macOS bootstrap (runs FIRST, before we need Python) --
 # A fresh Mac has no compiler, no Homebrew, and often no real python3. This
@@ -245,14 +262,14 @@ Click Install when prompted, wait for it to finish, then re-run this installer."
     spin_start "Downloading Homebrew installer..."
     if ! curl -fsSL --connect-timeout 20 --max-time 300 --retry 2 --retry-delay 3 \
          https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh \
-         -o /tmp/leon_brew_install.sh 2>/tmp/leon_brew_dl.log; then
+         -o $LEON_LOGDIR/brew_install.sh 2>$LEON_LOGDIR/brew_dl.log; then
       spin_stop
       [ -n "$SUDO_KEEP" ] && { kill "$SUDO_KEEP" 2>/dev/null; SUDO_KEEP=""; }
       die "Could not download the Homebrew installer." \
-          "Your internet connection timed out or is blocking raw.githubusercontent.com. Check your connection (or a VPN/firewall) and re-run the installer. $(tail -5 /tmp/leon_brew_dl.log 2>/dev/null)"
+          "Your internet connection timed out or is blocking raw.githubusercontent.com. Check your connection (or a VPN/firewall) and re-run the installer. $(tail -5 $LEON_LOGDIR/brew_dl.log 2>/dev/null)"
     fi
     spin_stop
-    [ -s /tmp/leon_brew_install.sh ] || {
+    [ -s $LEON_LOGDIR/brew_install.sh ] || {
       [ -n "$SUDO_KEEP" ] && { kill "$SUDO_KEEP" 2>/dev/null; SUDO_KEEP=""; }
       die "The Homebrew installer downloaded empty." "Re-run the installer; if it keeps happening your network is intercepting the download."
     }
@@ -261,8 +278,8 @@ Click Install when prompted, wait for it to finish, then re-run this installer."
     # 10-minute hard ceiling via run_timeout: this step hung indefinitely once
     # before with nothing but the spinner on screen to show for it.
     spin_start "Installing Homebrew (this can take a few minutes)..."
-    run_timeout 600 env NONINTERACTIVE=1 /bin/bash /tmp/leon_brew_install.sh \
-      </dev/null >/tmp/leon_brew.log 2>&1
+    run_timeout 600 env NONINTERACTIVE=1 /bin/bash $LEON_LOGDIR/brew_install.sh \
+      </dev/null >$LEON_LOGDIR/brew.log 2>&1
     BREW_RC=$?
     spin_stop
     [ -n "$SUDO_KEEP" ] && { kill "$SUDO_KEEP" 2>/dev/null; SUDO_KEEP=""; }
@@ -271,10 +288,10 @@ Click Install when prompted, wait for it to finish, then re-run this installer."
       die "Homebrew install timed out after 10 minutes — it stalled instead of finishing." \
           "This is usually a slow/blocked network partway through the install, or an
 installer prompt with nothing to answer it. Re-run on a faster or more open
-connection. $(tail -20 /tmp/leon_brew.log 2>/dev/null)"
+connection. $(tail -20 $LEON_LOGDIR/brew.log 2>/dev/null)"
     fi
     if [ $BREW_RC -ne 0 ]; then
-      die "Homebrew install failed." "$(tail -20 /tmp/leon_brew.log 2>/dev/null)"
+      die "Homebrew install failed." "$(tail -20 $LEON_LOGDIR/brew.log 2>/dev/null)"
     fi
 
     # Force brew path setup in THIS shell so we can verify it immediately
@@ -315,16 +332,16 @@ connection. $(tail -20 /tmp/leon_brew.log 2>/dev/null)"
     # PINNED. `brew install python3` tracks newest and would hand us 3.14 —
     # the exact trap the PY_PREFERRED=(13,12,11) ordering elsewhere exists to
     # avoid, since our wheels are not all built for it yet.
-    run_timeout 300 brew install python@3.12 </dev/null >/tmp/leon_pybrew.log 2>&1
+    run_timeout 300 brew install python@3.12 </dev/null >$LEON_LOGDIR/pybrew.log 2>&1
     PYBREW_RC=$?
     spin_stop
     if [ $PYBREW_RC -eq 124 ]; then
       die "Installing Python 3 via Homebrew timed out after 5 minutes." \
           "This is usually a slow or blocked network. Re-run the installer, or
-run \`brew install python3\` yourself first. $(tail -20 /tmp/leon_pybrew.log 2>/dev/null)"
+run \`brew install python3\` yourself first. $(tail -20 $LEON_LOGDIR/pybrew.log 2>/dev/null)"
     fi
     if [ $PYBREW_RC -ne 0 ]; then
-      die "Homebrew could not install Python 3." "$(tail -20 /tmp/leon_pybrew.log 2>/dev/null)"
+      die "Homebrew could not install Python 3." "$(tail -20 $LEON_LOGDIR/pybrew.log 2>/dev/null)"
     fi
     # Re-add Homebrew to PATH in case Homebrew added new paths
     ensure_brew_on_path
@@ -409,7 +426,7 @@ if [ -z "$PY" ] && [ "$OS" = "Linux" ] && [ -n "$PKG_MGR" ]; then
   else
     say "Python 3 not found — installing it via $PKG_MGR..."
   fi
-  : >/tmp/leon_pyapt.log
+  : >$LEON_LOGDIR/pyapt.log
   case "$PKG_MGR" in
     apt)
       PY_APT_OPTS="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30"
@@ -420,7 +437,7 @@ if [ -z "$PY" ] && [ "$OS" = "Linux" ] && [ -n "$PKG_MGR" ]; then
         apt-cache policy "python$v" 2>/dev/null | grep -q 'Candidate: [^(]' || continue
         say "  trying python$v..."
         $PKG_SUDO env DEBIAN_FRONTEND=noninteractive apt-get $PY_APT_OPTS install -y \
-            "python$v" "python$v-venv" </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+            "python$v" "python$v-venv" </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
         py_meets_floor "python$v" && break
       done
       # Last resort on older Ubuntu (20.04 ships nothing >= 3.11 at all):
@@ -428,45 +445,45 @@ if [ -z "$PY" ] && [ "$OS" = "Linux" ] && [ -n "$PKG_MGR" ]; then
       if ! find_best_python >/dev/null 2>&1 && [ -r /etc/os-release ] && grep -qi ubuntu /etc/os-release; then
         say "  no qualifying python in the default repos — trying the deadsnakes PPA..."
         $PKG_SUDO env DEBIAN_FRONTEND=noninteractive apt-get $PY_APT_OPTS install -y \
-            software-properties-common </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+            software-properties-common </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
         $PKG_SUDO env DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:deadsnakes/ppa \
-            </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+            </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
         $PKG_SUDO apt-get $PY_APT_OPTS update -qq </dev/null 2>/dev/null
         for v in 3.13 3.12 3.11; do
           apt-cache policy "python$v" 2>/dev/null | grep -q 'Candidate: [^(]' || continue
           $PKG_SUDO env DEBIAN_FRONTEND=noninteractive apt-get $PY_APT_OPTS install -y \
-              "python$v" "python$v-venv" "python$v-distutils" </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+              "python$v" "python$v-venv" "python$v-distutils" </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
           py_meets_floor "python$v" && break
         done
       fi
       # Ensure pip machinery exists for whichever one we landed on.
       $PKG_SUDO env DEBIAN_FRONTEND=noninteractive apt-get $PY_APT_OPTS install -y \
-          python3-pip </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+          python3-pip </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
       ;;
     dnf)
       for v in 3.14 3.13 3.12 3.11; do
-        $PKG_SUDO dnf install -y "python$v" </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+        $PKG_SUDO dnf install -y "python$v" </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
         py_meets_floor "python$v" && break
       done
-      $PKG_SUDO dnf install -y python3-pip </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+      $PKG_SUDO dnf install -y python3-pip </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
       ;;
     yum)
       for v in 3.12 3.11; do
-        $PKG_SUDO yum install -y "python$v" </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+        $PKG_SUDO yum install -y "python$v" </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
         py_meets_floor "python$v" && break
       done
-      $PKG_SUDO yum install -y python3-pip </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+      $PKG_SUDO yum install -y python3-pip </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
       ;;
     pacman)
       # Arch is rolling — plain `python` is always current.
-      $PKG_SUDO pacman -Sy --noconfirm python python-pip </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+      $PKG_SUDO pacman -Sy --noconfirm python python-pip </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
       ;;
     zypper)
       for v in 313 312 311; do
-        $PKG_SUDO zypper --non-interactive install "python$v" "python$v-devel" </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+        $PKG_SUDO zypper --non-interactive install "python$v" "python$v-devel" </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
         py_meets_floor "python${v:0:1}.${v:1}" && break
       done
-      $PKG_SUDO zypper --non-interactive install python3-pip </dev/null >>/tmp/leon_pyapt.log 2>&1 || true
+      $PKG_SUDO zypper --non-interactive install python3-pip </dev/null >>$LEON_LOGDIR/pyapt.log 2>&1 || true
       ;;
   esac
   PY="$(find_best_python || true)"
@@ -508,7 +525,7 @@ if [ -z "$PY" ]; then
       ${SUGGEST:-install Python 3.12 or newer from https://python.org/downloads/}
   Then re-run this installer.
 
-  Log:   /tmp/leon_pyapt.log"
+  Log:   $LEON_LOGDIR/pyapt.log"
 fi
 
 PYVER=$("$PY" -c 'import sys;print(f"{sys.version_info.major}.{sys.version_info.minor}")')
@@ -549,7 +566,7 @@ fi
 if ! "$PY" -c "import sys; sys.exit(0 if sys.version_info[:2] >= ($PY_FLOOR_MAJOR,$PY_FLOOR_MINOR) else 1)"; then
   die "Internal: selected interpreter $PY is $PYVER, below the ${PY_FLOOR_MAJOR}.${PY_FLOOR_MINOR} floor." \
       "This is a bug in the installer's Python selection, not a problem with your machine.
-  Please send this line to support along with /tmp/leon_pyapt.log"
+  Please send this line to support along with $LEON_LOGDIR/pyapt.log"
 fi
 
 # ── Privilege helper (root => no sudo; else sudo only if usable) ──
@@ -581,23 +598,23 @@ if [ "$OS" = "Linux" ] && [ -n "$PKG_MGR" ]; then
       $SUDO apt-get $APT_OPTS update -qq </dev/null 2>/dev/null
       $SUDO env DEBIAN_FRONTEND=noninteractive apt-get $APT_OPTS install -y \
             python3-venv python3-full python3-pip xdotool wmctrl tmux \
-            portaudio19-dev libsndfile1 ffmpeg </dev/null >/tmp/leon_apt.log 2>&1 || DEPS_OK=0
+            portaudio19-dev libsndfile1 ffmpeg </dev/null >$LEON_LOGDIR/apt.log 2>&1 || DEPS_OK=0
       ;;
     dnf)
       $SUDO dnf install -y python3-pip xdotool wmctrl tmux \
-            portaudio-devel libsndfile ffmpeg </dev/null >/tmp/leon_apt.log 2>&1 || DEPS_OK=0
+            portaudio-devel libsndfile ffmpeg </dev/null >$LEON_LOGDIR/apt.log 2>&1 || DEPS_OK=0
       ;;
     yum)
       $SUDO yum install -y python3-pip xdotool wmctrl tmux \
-            portaudio-devel libsndfile ffmpeg </dev/null >/tmp/leon_apt.log 2>&1 || DEPS_OK=0
+            portaudio-devel libsndfile ffmpeg </dev/null >$LEON_LOGDIR/apt.log 2>&1 || DEPS_OK=0
       ;;
     pacman)
       $SUDO pacman -Sy --noconfirm xdotool wmctrl tmux \
-            portaudio libsndfile ffmpeg </dev/null >/tmp/leon_apt.log 2>&1 || DEPS_OK=0
+            portaudio libsndfile ffmpeg </dev/null >$LEON_LOGDIR/apt.log 2>&1 || DEPS_OK=0
       ;;
     zypper)
       $SUDO zypper --non-interactive install xdotool wmctrl tmux \
-            portaudio-devel libsndfile-devel ffmpeg </dev/null >/tmp/leon_apt.log 2>&1 || DEPS_OK=0
+            portaudio-devel libsndfile-devel ffmpeg </dev/null >$LEON_LOGDIR/apt.log 2>&1 || DEPS_OK=0
       ;;
   esac
   if [ "$DEPS_OK" = 1 ]; then
@@ -631,7 +648,7 @@ if [ "$OS" = "Darwin" ]; then
       # the whole install (nothing after this line runs until it returns) —
       # so it gets the same 5-minute ceiling as every other brew step.
       spin_start "Installing PortAudio..."
-      run_timeout 300 brew install portaudio </dev/null >/tmp/leon_portaudio.log 2>&1
+      run_timeout 300 brew install portaudio </dev/null >$LEON_LOGDIR/portaudio.log 2>&1
       PORTAUDIO_RC=$?
       spin_stop
       if [ $PORTAUDIO_RC -eq 0 ]; then
@@ -650,7 +667,7 @@ if [ "$OS" = "Darwin" ]; then
     if command -v brew &>/dev/null; then
       say "Installing tmux (for background sessions)..."
       spin_start "Installing tmux..."
-      run_timeout 300 brew install tmux </dev/null >/tmp/leon_tmux.log 2>&1
+      run_timeout 300 brew install tmux </dev/null >$LEON_LOGDIR/tmux.log 2>&1
       TMUX_RC=$?
       spin_stop
       if [ $TMUX_RC -eq 0 ]; then
@@ -1042,7 +1059,7 @@ fi
 say ""
 say "Creating environment..."
 rm -rf .venv
-"$PY" -m venv .venv >/tmp/leon_venv.log 2>&1
+"$PY" -m venv .venv >$LEON_LOGDIR/venv.log 2>&1
 VPYTHON=""
 if   [ -x .venv/bin/python3 ];        then VPYTHON="$PWD/.venv/bin/python3"
 elif [ -x .venv/bin/python  ];        then VPYTHON="$PWD/.venv/bin/python"
@@ -1064,7 +1081,7 @@ fi
 # ── Install Python deps (with REAL error handling, no silent death) ──
 say ""
 spin_start "Installing packages (1-2 minutes)..."
-"$VPYTHON" -m pip install $PIPFLAGS --quiet --upgrade pip >/tmp/leon_pip.log 2>&1
+"$VPYTHON" -m pip install $PIPFLAGS --quiet --upgrade pip >$LEON_LOGDIR/pip.log 2>&1
 # CORE deps — the brain CANNOT think or serve without these. If any fail,
 # the install is genuinely unusable, so we die with the real reason.
 # B12: EXACT pins. Every version below was resolved with importlib.metadata
@@ -1079,10 +1096,10 @@ spin_start "Installing packages (1-2 minutes)..."
       websockets==10.4 python-multipart==0.0.32 python-dotenv==1.2.2 \
       Pillow==12.2.0 mss==10.2.0 psutil==7.2.2 anthropic==0.105.2 \
       requests==2.34.2 aiohttp==3.14.1 \
-      pyperclip screeninfo >>/tmp/leon_pip.log 2>&1
+      pyperclip screeninfo >>$LEON_LOGDIR/pip.log 2>&1
 PIP_RC=$?
 spin_stop
-[ $PIP_RC -ne 0 ] && die "pip install failed." "$(cat /tmp/leon_pip.log)"
+[ $PIP_RC -ne 0 ] && die "pip install failed." "$(cat $LEON_LOGDIR/pip.log)"
 # VOICE / AUDIO deps — BEST EFFORT. pyaudio needs portaudio headers and often
 # can't compile on a bare box; deepgram/elevenlabs are only used when the client
 # adds a key. None are hard-imported by the brain, so a failure here must NEVER
@@ -1100,14 +1117,14 @@ spin_start "Installing voice & audio (optional)..."
 "$VPYTHON" -m pip install $PIPFLAGS --quiet \
       pyttsx3 faster-whisper deepgram-sdk elevenlabs \
       sounddevice soundfile \
-      vosk webrtcvad >>/tmp/leon_pip.log 2>&1 || true
+      vosk webrtcvad >>$LEON_LOGDIR/pip.log 2>&1 || true
 
 # networkx, own line (one failure domain per line — see the note above).
 # Optional: without it the brainweb exporter falls back from Louvain to label
 # propagation — works, just visibly worse clustering. Pure-python wheel,
 # installs everywhere; unpinned so pip picks the newest the venv's Python
 # supports (3.5+ needs py3.11, older pythons resolve to an older networkx).
-"$VPYTHON" -m pip install $PIPFLAGS --quiet networkx >>/tmp/leon_pip.log 2>&1 || true
+"$VPYTHON" -m pip install $PIPFLAGS --quiet networkx >>$LEON_LOGDIR/pip.log 2>&1 || true
 
 # pyaudio, isolated, and told where Homebrew put the header. The probe above
 # already installed portaudio via brew; without these flags the compiler still
@@ -1116,9 +1133,9 @@ if [ "$OS" = "Darwin" ] && command -v brew &>/dev/null; then
   _BP="$(brew_prefix)"
   CPPFLAGS="-I${_BP}/include${CPPFLAGS:+ $CPPFLAGS}" \
   LDFLAGS="-L${_BP}/lib${LDFLAGS:+ $LDFLAGS}" \
-  "$VPYTHON" -m pip install $PIPFLAGS --quiet pyaudio >>/tmp/leon_pip.log 2>&1 || true
+  "$VPYTHON" -m pip install $PIPFLAGS --quiet pyaudio >>$LEON_LOGDIR/pip.log 2>&1 || true
 else
-  "$VPYTHON" -m pip install $PIPFLAGS --quiet pyaudio >>/tmp/leon_pip.log 2>&1 || true
+  "$VPYTHON" -m pip install $PIPFLAGS --quiet pyaudio >>$LEON_LOGDIR/pip.log 2>&1 || true
 fi
 # vosk + webrtcvad power the "always listening" wake-word loop (say "hey <name>").
 # Default wake backend is Vosk; its ~40MB model auto-downloads on first use.
@@ -1129,7 +1146,7 @@ if [ "$OS" = "Darwin" ]; then
   # voice driver (NSSpeechSynthesizer) needs — without it the free fallback
   # voice fails to init and the SI goes silent on Mac. ApplicationServices
   # alone is NOT enough.
-  "$VPYTHON" -m pip install $PIPFLAGS --quiet pyobjc-framework-ApplicationServices pyobjc-framework-Cocoa >>/tmp/leon_pip.log 2>&1 || true
+  "$VPYTHON" -m pip install $PIPFLAGS --quiet pyobjc-framework-ApplicationServices pyobjc-framework-Cocoa >>$LEON_LOGDIR/pip.log 2>&1 || true
 fi
 say "${G}[OK]${N} Packages installed"
 
@@ -1145,8 +1162,8 @@ say "Verifying install..."
 # captioned "no lying that it worked" has to check what it claims to check.
 # Pillow imports as PIL and python-multipart as multipart — import NAMES here,
 # never distribution names, or the gate fails on a perfectly good install.
-if ! "$VPYTHON" -c "import numpy, scipy, fastapi, uvicorn, websockets, multipart, dotenv, PIL, mss, psutil, anthropic, requests, aiohttp" >/tmp/leon_verify.log 2>&1; then
-  die "Core imports failed after install — environment is not usable." "$(cat /tmp/leon_verify.log)"
+if ! "$VPYTHON" -c "import numpy, scipy, fastapi, uvicorn, websockets, multipart, dotenv, PIL, mss, psutil, anthropic, requests, aiohttp" >$LEON_LOGDIR/verify.log 2>&1; then
+  die "Core imports failed after install — environment is not usable." "$(cat $LEON_LOGDIR/verify.log)"
 fi
 say "${G}[OK]${N} Core dependencies verified"
 # The new tree is proven usable, so it is no longer something to roll back
@@ -1188,7 +1205,7 @@ done
 
 if [ -z "$CLAUDE_BIN" ] && command -v npm >/dev/null 2>&1; then
   say "  Installing the Claude CLI (one time)..."
-  if run_timeout 300 npm install -g @anthropic-ai/claude-code >/tmp/leon_claude_npm.log 2>&1; then
+  if run_timeout 300 npm install -g @anthropic-ai/claude-code >$LEON_LOGDIR/claude_npm.log 2>&1; then
     CLAUDE_BIN="$(command -v claude 2>/dev/null)"
     [ -z "$CLAUDE_BIN" ] && [ -x "$HOME/.local/bin/claude" ] && CLAUDE_BIN="$HOME/.local/bin/claude"
   fi
@@ -1199,8 +1216,8 @@ if [ -n "$CLAUDE_BIN" ]; then
   # Only a real end-to-end reply proves it. Presence of the binary, or of a
   # credentials file, proves nothing — both were true while the SI was mute.
   if run_timeout 90 "$CLAUDE_BIN" -p "reply with the single word: ready" \
-       >/tmp/leon_claude_probe.log 2>&1 \
-     && grep -qi 'ready' /tmp/leon_claude_probe.log; then
+       >$LEON_LOGDIR/claude_probe.log 2>&1 \
+     && grep -qi 'ready' $LEON_LOGDIR/claude_probe.log; then
     VOICE_OK=1
   fi
 fi
