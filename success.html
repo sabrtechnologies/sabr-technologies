@@ -59,6 +59,7 @@
   <p class="dim" id="sub">Provisioning your synthetic intelligence…</p>
   <div id="body"></div>
 </div>
+<script src="/js/site-network.js"></script>
 <script>
 (function () {
   var API = 'https://sabr-checkout-production.up.railway.app';
@@ -126,6 +127,8 @@
          package is the .deb (double-click installs, icon in the app menu).
          Swap it here so the buyer never meets a naked binary. */
       if (g.key === 'linux') href = href.replace(/\/sabr-installer$/, '/sabr-installer.deb');
+      href = window.SabrUI.safeURL(href, ['github.com']);
+      if (!href) return;
       h += '<a class="' + (g.you ? 'rec' : '') + '" href="' + esc(href) + '">' +
            '<b>' + g.label + '</b><span>' + g.sub + '</span>' +
            (g.you ? '<span class="tag">Recommended</span>' : '') + '</a>';
@@ -166,9 +169,7 @@
       var b = document.getElementById(btnId), s = document.getElementById(srcId);
       if (!b || !s) return;
       b.addEventListener('click', function () {
-        var t = s.textContent, done = function () { b.textContent = 'Copied'; };
-        if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done);
-        else done();
+        window.SabrUI.copy(s.textContent, b);
       });
     }
     wire('copyKey', 'key');
@@ -186,8 +187,7 @@
   var tries = 0;
   (function poll() {
     tries++;
-    fetch(API + '/install?session_id=' + encodeURIComponent(sid))
-      .then(function (r) { return r.json().catch(function () { return {}; }); })
+    window.SabrUI.json(API + '/install?session_id=' + encodeURIComponent(sid))
       .then(function (d) {
         if (d && d.ok && !d.pending && d.token) {
           try { sessionStorage.setItem(CACHE, JSON.stringify(d)); } catch (e) {}
@@ -199,10 +199,10 @@
       })
       .catch(function () {
         if (tries < 40) return setTimeout(poll, 2000);
-        sub.textContent = 'Your payment went through — the charge is safe.';
-        body.innerHTML = '<p class="warn">Provisioning is taking longer than it should. ' +
-          'Nothing is lost. Email <a href="mailto:deansabrwork@gmail.com">deansabrwork@gmail.com</a> ' +
-          'with this page open and you will be set up by hand, usually within the hour.</p>';
+        sub.textContent = 'We could not confirm your installation status.';
+        body.innerHTML = '<p class="warn">Check your receipt before trying another payment. ' +
+          'Refresh this page to try again, or email <a href="mailto:deansabrwork@gmail.com">deansabrwork@gmail.com</a> ' +
+          'with your receipt so we can check your order.</p>';
       });
   })();
 })();

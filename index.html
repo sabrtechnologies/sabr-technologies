@@ -958,6 +958,7 @@ footer{
 
 <div class="grain" aria-hidden="true"></div>
 
+<script src="/js/site-network.js"></script>
 <script>
 /* the embedded brain viewer forwards wheel/touch deltas out of its iframe
    (see js/brainweb-page.html EMBED block) so page scroll never dies while
@@ -1066,13 +1067,14 @@ window.addEventListener('message', function(e){
       var label = btn.textContent;
       btn.textContent = 'Opening secure checkout…';
       if (msg) msg.textContent = '';
-      fetch(CHECKOUT_API + '/create-checkout', {
+      window.SabrUI.json(CHECKOUT_API + '/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan: btn.getAttribute('data-plan'), interval: interval })
-      }).then(function (r) { return r.json().catch(function () { return {}; }); })
+      })
         .then(function (d) {
-          if (d && d.ok && d.url) { window.location.href = d.url; return; }
+          var checkout = d && window.SabrUI.safeURL(d.url, ['checkout.stripe.com']);
+          if (d && d.ok && checkout) { window.location.href = checkout; return; }
           throw new Error((d && d.error) || 'Checkout is unavailable right now.');
         })
         .catch(function (err) {
@@ -1108,7 +1110,7 @@ window.addEventListener('message', function(e){
     var go = document.getElementById('tGo');
     go.disabled = true; go.textContent = 'Creating your mind\u2026';
     msg.textContent = '';
-    fetch('/api/onboarding/create-account', {
+    window.SabrUI.json('/api/onboarding/create-account', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         userName: document.getElementById('tName').value.trim(),
@@ -1118,7 +1120,7 @@ window.addEventListener('message', function(e){
         siName: document.getElementById('tSi').value.trim(),
         business: '24-hour free trial'
       })
-    }).then(function(r){ return r.json(); }).then(function(d){
+    }).then(function(d){
       if (!d || !d.ok || !d.token) throw new Error((d && d.error) || 'Could not create the trial');
       form.hidden = true;
       document.getElementById('tKey').textContent = d.token;
@@ -1151,9 +1153,7 @@ window.addEventListener('message', function(e){
   var cp = document.getElementById('tCopy');
   if (cp) cp.addEventListener('click', function(){
     var t = document.getElementById('tKey').textContent;
-    var done = function(){ cp.textContent = 'Copied'; };
-    if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done);
-    else done();
+    window.SabrUI.copy(t, cp);
   });
 })();
 </script>
