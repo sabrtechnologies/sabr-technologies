@@ -388,7 +388,7 @@ section{ position:relative; padding:clamp(90px, 12vw, 160px) var(--pad); max-wid
 #pricing .plan .pd{ grid-column:2; grid-row:1 / span 3; }
 #pricing .plan .pcc{ grid-column:2; grid-row:4; justify-self:start; }
 #pricing .plan .buyMsg{ grid-column:2; grid-row:5; }
-#pricing .plan #entBox{ grid-column:2; grid-row:6; }
+#pricing .plan #entBox,#pricing .plan #bizBox{ grid-column:2; grid-row:6; }
 #pricing .plan ul{ grid-column:3; grid-row:1 / span 6; margin-top:0; }
 #pricing .plan #trialForm{ grid-column:3; grid-row:1 / span 6; margin-top:0; }
 #pricing .plan #trialDone{ grid-column:3; grid-row:1 / span 6; }
@@ -454,9 +454,9 @@ section{ position:relative; padding:clamp(90px, 12vw, 160px) var(--pad); max-wid
                     100% 100%, 10px 100%, 0 calc(100% - 10px)); }
 .plan.hot .pcc:hover{ background:#FF3B35; border-color:rgba(255,255,255,.4); }
 .buyMsg{ font-size:12.5px; color:var(--ink-3); margin-top:10px; min-height:16px; }
-#entBox{ display:none; margin-top:12px; padding:16px; border:1px solid rgba(238,90,84,.34);
+#entBox,#bizBox{ display:none; margin-top:12px; padding:16px; border:1px solid rgba(238,90,84,.34);
   border-radius:var(--r-sm); background:rgba(255,59,53,.07); text-align:left; }
-#entBox .k{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#EE5A54; margin-bottom:6px; }
+#entBox .k,#bizBox .k{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#EE5A54; margin-bottom:6px; }
 #entMail{ font-size:15px; color:#fff; }
 #entCopy{ display:inline-block; margin-top:10px; font-size:12px; letter-spacing:.08em;
   text-transform:uppercase; color:#EE5A54; text-decoration:none;
@@ -825,8 +825,8 @@ footer{
     </div>
     <div class="plan hot">
       <div class="pn">Business</div>
-      <div class="pr"><span id="bAmt" style="font-size:inherit;font-weight:inherit;color:inherit;letter-spacing:inherit;">$12,000</span><span id="bPer"> / month</span></div>
-      <div class="pk" id="bDue"><strong>$87,000</strong> due today: $75,000 deployment + first month. Exactly what Stripe charges.</div>
+      <div class="pr">Talk to us</div>
+      <div class="pk">Priced per deployment. We scope it with you before anything is quoted.</div>
       <div class="pd">A mind embedded in how your company runs. It answers every lead in seconds, works your operations around the clock, and is built to your business during a deployment done by hand.</div>
       <ul>
         <li>Everything in Founder</li>
@@ -837,8 +837,13 @@ footer{
         <li>Priority support from founder</li>
         <li>Two machine activations</li>
       </ul>
-      <a href="#" class="pcc buyBtn" data-plan="business">Pay &amp; Deploy Instantly</a>
+      <a href="#" class="pcc bizCta" id="bizCta">Talk to Us</a>
       <div class="buyMsg"></div>
+      <div id="bizBox">
+        <div class="k">Reach Dean directly</div>
+        <div id="bizMail">deansabrwork@gmail.com</div>
+        <a href="#" id="bizCopy">Copy address</a>
+      </div>
     </div>
     <div class="plan">
       <div class="pn">Enterprise</div>
@@ -990,6 +995,25 @@ window.addEventListener('message', function(e){
 /* parallax + hero particle canvas removed 08-25: two of seven simultaneous
    ambient systems too many. The page holds still; the brain moves. */
 
+/* ── Business contact reveal — Business is quoted, never self-serve ── */
+(function () {
+  var c = document.getElementById('bizCta'),
+      box = document.getElementById('bizBox'),
+      cp = document.getElementById('bizCopy');
+  if (!c || !box) return;
+  c.addEventListener('click', function (e) {
+    e.preventDefault();
+    box.style.display = 'block';
+    c.textContent = 'Talk to Us. Details below';
+  });
+  if (cp) cp.addEventListener('click', function (e) {
+    e.preventDefault();
+    var done = function () { cp.textContent = 'Copied'; };
+    if (navigator.clipboard) navigator.clipboard.writeText('deansabrwork@gmail.com').then(done, done);
+    else done();
+  });
+})();
+
 /* ── Enterprise contact reveal (never a mailto handoff) ─────── */
 (function () {
   var c = document.getElementById('entCta'),
@@ -1016,20 +1040,13 @@ window.addEventListener('message', function(e){
   var CHECKOUT_API = 'https://sabr-checkout-production.up.railway.app';
   var interval = 'month';
   var PRICES = {
-    month: { i: ['$7,499', ' / month'],  b: ['$12,000', ' / month'] },
-    year:  { i: ['$74,990', ' / year'], b: ['$120,000', ' / year'] }
+    month: { i: ['$7,499', ' / month'] },
+    year:  { i: ['$74,990', ' / year'] }
   };
   function paint() {
     var p = PRICES[interval];
-    var m = { iAmt: p.i[0], iPer: p.i[1], bAmt: p.b[0], bPer: p.b[1] };
+    var m = { iAmt: p.i[0], iPer: p.i[1] };
     for (var k in m) { var e = document.getElementById(k); if (e) e.textContent = m[k]; }
-    /* Due-today mirrors EXACTLY what Stripe's checkout session totals:
-       setup ($75,000) + first billing period. Verified against live Stripe
-       sessions 2026-08-25 ($87,000 month mode). */
-    var due = document.getElementById('bDue');
-    if (due) due.innerHTML = interval === 'month'
-      ? '<strong>$87,000</strong> due today: $75,000 deployment + first month. Exactly what Stripe charges.'
-      : '<strong>$195,000</strong> due today: $75,000 deployment + first year. Exactly what Stripe charges.';
     var bm = document.getElementById('bMonth'), by = document.getElementById('bYear');
     if (bm) bm.className = interval === 'month' ? 'on' : '';
     if (by) by.className = interval === 'year' ? 'on' : '';
