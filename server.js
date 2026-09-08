@@ -12,6 +12,28 @@ const MIME = {
   '.glb':'model/gltf-binary', '.gltf':'model/gltf+json'
 };
 const ROOT = __dirname;
+const MAX_URL_LENGTH = 8192;
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'self'",
+    "frame-src 'self'",
+    "form-action 'self' https://checkout.stripe.com",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data:",
+    "media-src 'self'",
+    "connect-src 'self' https://sabr-checkout-production.up.railway.app",
+    "upgrade-insecure-requests"
+  ].join('; '),
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()'
+};
 
 const PAGES = new Set(['index.html', 'privacy.html', 'quickstart.html',
   'refunds.html', 'success.html', 'terms.html', 'troubleshooting.html',
@@ -34,10 +56,9 @@ function publicPath(raw) {
 function createServer(root = ROOT) {
   const realRoot = fs.realpathSync(root);
   return http.createServer(async (req, res) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Referrer-Policy', 'no-referrer');
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) res.setHeader(name, value);
     const fail = status => { res.writeHead(status); res.end(http.STATUS_CODES[status]); };
+    if ((req.url || '').length > MAX_URL_LENGTH) return fail(414);
     if (!['GET', 'HEAD'].includes(req.method)) {
       res.setHeader('Allow', 'GET, HEAD');
       return fail(405);

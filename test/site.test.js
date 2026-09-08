@@ -37,6 +37,7 @@ test('real HTTP server rejects private files and survives malformed requests', a
     req.on('error', reject); req.end();
   });
   try {
+    assert.equal((await request('/' + 'a'.repeat(8192))).status, 414);
     assert.equal((await request('/%E0%A4%A')).status, 400);
     for (const p of ['/server.js', '/.git/config', '/js/leak.js', '/missing', '/api/health'])
       assert.equal((await request(p)).status, 404, p);
@@ -45,6 +46,9 @@ test('real HTTP server rejects private files and survives malformed requests', a
     assert.equal(page.status, 200);
     assert.equal(page.body, '<h1>Sabr</h1>');
     assert.equal(page.headers['referrer-policy'], 'no-referrer');
+    assert.equal(page.headers['content-security-policy'],
+      "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; frame-src 'self'; form-action 'self' https://checkout.stripe.com; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' https://sabr-checkout-production.up.railway.app; upgrade-insecure-requests");
+    assert.equal(page.headers['permissions-policy'], 'camera=(), microphone=(), geolocation=(), payment=()');
     assert.equal((await request('/', 'HEAD')).body, '');
   } finally {
     await new Promise(resolve => server.close(resolve));
