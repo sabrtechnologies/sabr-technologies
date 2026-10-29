@@ -49,6 +49,15 @@ restore_previous_install(){
 }
 die(){ spin_stop 2>/dev/null; say "${R}[FAILED]${N} $1"; [ -n "$2" ] && { say "${Y}--- details ---${N}"; echo "$2" | tail -12; }; restore_previous_install; exit 1; }
 
+# Read only public version metadata, never .env or memory contents.
+installed_version(){
+  local root="$1" commit digest
+  commit="$(sed -nE 's/^commit: +([0-9a-f]{7,40})( .*)?$/\1/p' "$root/VERSION" 2>/dev/null | head -1)"
+  digest="$(sed -nE 's/^release_sha256=([0-9a-f]{64})$/\1/p' "$root/.sabr-release" 2>/dev/null | head -1)"
+  printf 'commit=%s release=%s' "${commit:-unknown}" "${digest:-unknown}"
+}
+# END installed_version
+
 # Package-manager detection for Linux. Every dependency step below used to
 # hardcode apt-get and simply do nothing — no error, no warning, just a
 # silent no-op — on any distro that doesn't have it (Fedora/RHEL/CentOS via
@@ -187,7 +196,7 @@ ARCH="$(uname -m)"
 # tarball would only prove the payload arrived intact from whoever sent
 # it, which is not the same as proving we sent it. Written by
 # build_release.sh — never edit by hand, and never fetch it at runtime.
-EXPECTED_RELEASE_SHA256="85b872d49aaeb42f96613cbce5fe9cd48d8503844b59e12f25b2e64556e55566"
+EXPECTED_RELEASE_SHA256="874d5427f426dcdb46202bdf1e1cb6dd6ca5a8a83f93db86617906f7652e4e09"
 
 # -- macOS bootstrap (runs FIRST, before we need Python) --
 # A fresh Mac has no compiler, no Homebrew, and often no real python3. This
@@ -857,29 +866,6 @@ dean@sabrtechnologies.com."
 Both sources are HTTPS and neither answered. Check your connection, or
 contact dean@sabrtechnologies.com if this keeps happening."
 fi
-# ── Stop any previously-installed SI before replacing it ──────────────
-# Reinstalling over a still-running brain leaves the old process holding
-# port 8000, so the fresh one can't bind and it looks like "nothing happens".
-# Kill the old instance + its dashboard tmux session first. Scoped to THIS
-# install's venv interpreter so unrelated python processes are never touched.
-if [ -d "$INSTALL_DIR" ]; then
-  say "Stopping previous SI (if running)..."
-  pkill -f "$INSTALL_DIR/.venv/bin/python" 2>/dev/null || true
-  tmux kill-session -t leon 2>/dev/null || true
-  # NOT a blind `fuser -k 8000/tcp`. That kills whatever holds port 8000 on the
-  # owner's machine — their own dev server, someone else's app — and an
-  # installer that terminates unrelated software is a defect, not a cleanup.
-  # Only kill a listener we can prove is this install's own interpreter.
-  if command -v lsof >/dev/null 2>&1; then
-    for _pid in $(lsof -t -iTCP:8000 -sTCP:LISTEN 2>/dev/null); do
-      _exe=$(readlink -f "/proc/$_pid/exe" 2>/dev/null || true)
-      case "$_exe" in
-        "$INSTALL_DIR"/*) kill "$_pid" 2>/dev/null || true ;;
-      esac
-    done
-  fi
-  sleep 1
-fi
 # ── B4: VALIDATE THEN SWAP. Never delete-then-hope. ───────────────────
 # This used to be `rm -rf leon-brain` followed by `tar xzf`. The delete ran
 # AFTER the download but BEFORE extraction, pip, or any verification — so any
@@ -891,9 +877,8 @@ fi
 # Now: extract beside the old one, prove the payload is real, carry the
 # identity across, swap, and keep the previous tree until the new one has been
 # stood up. Nothing is removed until something better exists.
-STAGE_DIR="$HOME/.leon-brain-staging.$$"
-rm -rf "$STAGE_DIR"
-mkdir -p "$STAGE_DIR" || die "Cannot create staging dir ($STAGE_DIR)"
+say "Previous installed version: $(installed_version "$INSTALL_DIR")"
+STAGE_DIR=$(mktemp -d "$HOME/.leon-brain-staging.XXXXXXXX") || die "Cannot create staging dir" ""
 tar xzf leon-brain.tar.gz -C "$STAGE_DIR" || {
   rm -rf "$STAGE_DIR"
   die "Extraction failed (corrupt tarball?) — your existing install is untouched."
@@ -904,43 +889,66 @@ if [ ! -d "$STAGE_DIR/leon-brain" ] || [ ! -f "$STAGE_DIR/leon-brain/run.py" ]; 
   die "Extracted tree is not a brain (no run.py) — refusing to replace a working install."
 fi
 
+# Refuse payload state, including dangling symlinks. Copying onto a packaged
+# directory would merge someone else's memories; a symlink could redirect .env.
+# This is a packaging error, not something an update should silently repair.
+for keep in .env brain_state brain_state-backups brain_state-snapshots; do
+  if [ -e "$STAGE_DIR/leon-brain/$keep" ] || [ -L "$STAGE_DIR/leon-brain/$keep" ]; then
+    die "Release contains $keep — refusing to replace your existing install."
+  fi
+done
+
+# Use the verified payload's ownership checks, never pkill by substring or a
+# shared tmux session name. An uncertain stop leaves the old tree untouched.
 if [ -d "$INSTALL_DIR" ]; then
-  # Carry identity and memory forward BEFORE the swap. Losing these is losing
-  # the instance: .env holds the dashboard key and the SI's name, brain_state/
-  # holds everything it remembers.
-  for keep in .env brain_state; do
-    if [ -e "$INSTALL_DIR/$keep" ]; then
-      cp -a "$INSTALL_DIR/$keep" "$STAGE_DIR/leon-brain/" 2>/dev/null \
-        && say "  ${G}kept${N} $keep" \
-        || say "  ${Y}[WARN]${N} could not carry $keep forward"
+  if ! PYTHONPATH="$STAGE_DIR/leon-brain" "$PY" - "$INSTALL_DIR" <<'PYSTOP'
+import sys
+from installer.sabr_installer import _stop_si_before_overwrite
+_stop_si_before_overwrite(sys.argv[1])
+PYSTOP
+  then
+    die "Could not confirm the previous SI stopped; existing files retained." ""
+  fi
+fi
+
+if [ -d "$INSTALL_DIR" ]; then
+  # Copy complete state, including SQLite WALs and saved configuration.
+  # Copy failure is fatal BEFORE the swap. Leave staging for diagnosis.
+  # Memory migrations do not belong in an update's preservation step.
+  for keep in .env brain_state brain_state-backups brain_state-snapshots; do
+    if [ -e "$INSTALL_DIR/$keep" ] || [ -L "$INSTALL_DIR/$keep" ]; then
+      if ! cp -a "$INSTALL_DIR/$keep" "$STAGE_DIR/leon-brain/"; then
+        die "Could not preserve $keep — your existing install is untouched."
+      fi
+      say "  ${G}kept${N} $keep"
     fi
   done
-  # ── Purge legacy owner seeds from the memory we just carried forward ──
-  # The carry-forward above is what makes the owner-seed leak permanent:
-  # releases before 2026-08-18 wrote his personal facts into every
-  # knowledge.db (core_fact_seed / dean_bio_seed / client_seed v1) plus
-  # brain_state/core_facts.md, knowledge_store marks those sources durable so
-  # they never decay, and this loop hands them to the next install. So a
-  # customer reinstalling TO FIX the SI that dreams about things they have
-  # never owned was carrying the cause across with them.
-  #
-  # Runs on the STAGED copy, before the swap: if it goes wrong the original
-  # brain_state is still untouched at $INSTALL_DIR and the rollback path
-  # below restores it. The module is stdlib-only and gates itself on
-  # brain/origin.py (owner_facts.py absent == shipped build == client), which
-  # resolves from the staged tree because we cd into it. The si_name check is
-  # the second belt: bootstrap only ever knows the SI's name from the .env it
-  # just carried over.
-  if [ -f "$STAGE_DIR/leon-brain/brain/purge_owner_seeds.py" ] && [ -n "${PY:-}" ]; then
-    _SI_NAME_CARRIED="$(grep -E '^LEON_SI_NAME=' "$STAGE_DIR/leon-brain/.env" 2>/dev/null \
-                        | tail -1 | cut -d= -f2- | tr -d '"'"'"'[:space:]')"
-    if [ "$(printf '%s' "$_SI_NAME_CARRIED" | tr 'A-Z' 'a-z')" != "leon" ]; then
-      ( cd "$STAGE_DIR/leon-brain" && "$PY" -m brain.purge_owner_seeds ) 2>/dev/null \
-        || say "  ${Y}[WARN]${N} owner-seed purge skipped (non-fatal)"
-    fi
+  # Retain customer additions beneath replaced directories as well as files
+  # at the root. The previous whole tree remains available for rollback.
+  if ! "$PY" - "$INSTALL_DIR" "$STAGE_DIR/leon-brain" <<'PYKEEP'
+import os, shutil, sys
+old_root, new_root = sys.argv[1:]
+def carry(old, new):
+    for name in os.listdir(old):
+        if old == old_root and name in {".venv", ".env", "brain_state", "brain_state-backups", "brain_state-snapshots"}:
+            continue
+        src, dst = os.path.join(old, name), os.path.join(new, name)
+        if not os.path.lexists(dst):
+            if os.path.islink(src):
+                os.symlink(os.readlink(src), dst)
+            elif os.path.isdir(src):
+                shutil.copytree(src, dst, symlinks=True)
+            else:
+                shutil.copy2(src, dst)
+        elif os.path.isdir(src) and not os.path.islink(src) and os.path.isdir(dst) and not os.path.islink(dst):
+            carry(src, dst)
+carry(old_root, new_root)
+PYKEEP
+  then
+    die "Could not preserve customer files; existing installation retained." ""
   fi
-  BACKUP_DIR="$HOME/.leon-brain-previous.$$"
-  rm -rf "$BACKUP_DIR"
+  BACKUP_DIR=$(mktemp -d "$HOME/.leon-brain-previous.XXXXXXXX") || die "Cannot reserve recovery path" ""
+  rmdir "$BACKUP_DIR" || die "Cannot reserve recovery path" ""
   mv "$INSTALL_DIR" "$BACKUP_DIR" || {
     rm -rf "$STAGE_DIR"
     die "Could not move the existing install aside — nothing changed."
@@ -970,8 +978,9 @@ fi
 {
   echo "release_sha256=$EXPECTED_RELEASE_SHA256"
   echo "installed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)"
-} > "$INSTALL_DIR/.sabr-release" 2>/dev/null || true
+} > "$INSTALL_DIR/.sabr-release" 2>/dev/null || die "Could not record the installed release version." ""
 
+say "Installed payload version: $(installed_version "$INSTALL_DIR")"
 say "${G}[OK]${N} Installed to ~/leon-brain/"
 cd "$INSTALL_DIR" || die "Install dir missing after swap"
 
@@ -1040,7 +1049,9 @@ _SCRUB_CLIENT=""
 if [ -n "${SABR_TENANT_TOKEN:-}" ]; then _SCRUB_CLIENT="1"; fi
 _SCRUB_NAME="$(grep -E '^LEON_SI_NAME=' .env 2>/dev/null | tail -1 | cut -d= -f2- | tr -d '"'"'"'[:space:]' | tr 'A-Z' 'a-z')"
 if [ -n "$_SCRUB_NAME" ] && [ "$_SCRUB_NAME" != "leon" ]; then _SCRUB_CLIENT="1"; fi
-if [ -f scrub_list.txt ]; then
+if [ -n "$BACKUP_DIR" ]; then
+  say "Keeping existing customer identity and notes; no memory/privacy migration during update."
+elif [ -f scrub_list.txt ]; then
   while IFS= read -r _line || [ -n "$_line" ]; do
     _line="${_line%%$'\r'}"
     case "$_line" in ''|'#'*) continue ;; esac
@@ -1100,6 +1111,12 @@ spin_start "Installing packages (1-2 minutes)..."
 PIP_RC=$?
 spin_stop
 [ $PIP_RC -ne 0 ] && die "pip install failed." "$(cat $LEON_LOGDIR/pip.log)"
+
+# Coding is part of customer readiness. The pinned upstream environment lives
+# under preserved brain_state; dependency/provisioning failure triggers rollback.
+"$VPYTHON" -m pip install $PIPFLAGS --quiet uv==0.9.2 >>"$LEON_LOGDIR/pip.log" 2>&1 || die "Hermes provisioner dependency failed."
+"$VPYTHON" tools/native_jobs/install_hermes.py >"$LEON_LOGDIR/hermes-install.log" 2>&1 || die "Hermes runtime installation failed." "$(cat "$LEON_LOGDIR/hermes-install.log")"
+
 # VOICE / AUDIO deps — BEST EFFORT. pyaudio needs portaudio headers and often
 # can't compile on a bare box; deepgram/elevenlabs are only used when the client
 # adds a key. None are hard-imported by the brain, so a failure here must NEVER
