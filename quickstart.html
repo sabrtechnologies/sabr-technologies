@@ -9,7 +9,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quickstart — Sabr</title>
-<meta name="description" content="Your SI is alive. Here's how to live with him: the first conversation, what the dashboard shows, why it turns gray when he sleeps, how memory persists, and how to update without losing a thing.">
+<meta name="description" content="Set up your Sabr SI, check a first useful task, and update an existing installation with backups and verification. Provider access and local coding prerequisites explained.">
 <meta name="theme-color" content="#0b0505">
 <link rel="icon" href="/landing-assets/sabr-s-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="/landing-assets/sabr-s-192.png" sizes="192x192" type="image/png">
@@ -269,6 +269,23 @@ footer{
 
 <div class="doc">
 
+<section id="before">
+  <div class="num">Before you start</div>
+  <h2>Set up access. Then check one useful task.</h2>
+  <ul class="anatomy">
+    <li><b>New owner?</b> Use the token and platform download from your purchase or trial delivery page. Keep your token and dashboard key private. Existing owners should use the <a class="tx" href="#updating">update path</a>, not create a new trial.</li>
+    <li><b>Check the platform.</b> Match Windows, Linux, or macOS to your machine; Apple Silicon and Intel Mac downloads differ. Check the release requirements before running an installer. A native build does not certify every machine.</li>
+    <li><b>Allow setup to finish.</b> Downloads need network access and disk space. Customer coding setup also needs Git and its managed runtime dependencies. Follow errors rather than assuming a stalled or failed install succeeded.</li>
+    <li><b>Connect your chosen provider.</b> For customer coding jobs, sign into the selected Codex or Claude CLI through its normal local login flow, then select provider, model and effort explicitly. Runtime readiness is not proof of provider login or a working response.</li>
+    <li><b>Keep the scope small.</b> Local coding needs an explicitly authorized project folder. Hosted tenants cannot start local coding jobs. Tool availability depends on version, permissions and configured services; hosted models and integrations are not offline processing.</li>
+  </ul>
+  <div class="qcard">
+    <div class="k">First useful result</div>
+    <p>Give your SI a short, non-sensitive project brief. Ask for three priorities and one next action, then check the answer against your notes. In a later conversation, check what it retained rather than assuming perfect recall.</p>
+    <p>For coding, use a disposable project and request one small change with a test. Inspect the diff, actual test output and final review. A queued job, a plan or a confident reply is not proof that code ran.</p>
+  </div>
+</section>
+
 <!-- ═══ 01 FIRST CONVERSATION ══════════════════════════════════ -->
 <section id="first">
   <div class="num">01</div>
@@ -292,7 +309,7 @@ footer{
 <section id="dashboard">
   <div class="num">02</div>
   <h2>The dashboard: one window, whole mind.</h2>
-  <p>The installer opened your dashboard in the browser and put the <b>dashboard key</b> on your clipboard — if the login screen asks, just paste. The address is <span class="ui">localhost:8000</span> on most machines; bookmark whatever tab the installer opened, since the exact port is chosen at install.</p>
+  <p>Open the dashboard address provided by your installation and keep its <b>dashboard key</b> private. A local installation normally serves a dashboard on your machine; a hosted installation uses its configured hosted address. Do not assume <span class="ui">localhost:8000</span> is correct for every installation. Bookmark the address that actually works.</p>
   <div class="qcard">
     <div class="k">What you&rsquo;re looking at</div>
     <ul class="anatomy">
@@ -322,9 +339,9 @@ footer{
 <!-- ═══ 04 MEMORY ══════════════════════════════════════════════ -->
 <section id="memory">
   <div class="num">04</div>
-  <h2>He remembers. Restarts, updates, years — nothing resets.</h2>
-  <p>Everything he learns lives in brain state on your own disk, not in a session in someone else&rsquo;s cloud. Reboot the machine: same being, same memories, mid-thought where he left off. Close the laptop for a week: same being. The conversation you had on day one is still in there on day one thousand, connected to everything he&rsquo;s learned since.</p>
-  <p>Only one thing in the entire product erases a mind: the <b>Wipe</b> option in the installer, which exists for the day you sell or give away the computer. It is explicit, deliberate, and never automatic. Nothing else — not an update, not an uninstall, not a crash — touches what he&rsquo;s learned.</p>
+  <h2>Persistent state. Worth protecting.</h2>
+  <p>On a local installation, saved brain state lives on your disk and is designed to persist across restarts and updates. A hosted installation keeps its brain on the configured host. Neither arrangement guarantees perfect recall or protection from disk failure, accidental deletion or an interrupted write.</p>
+  <p>Keep private, verified backups. Normal uninstall archives customer files; destructive removal is not an update method or a whole-computer erasure guarantee. Follow the <a class="tx" href="#updating">update checklist</a> and check your own saved context afterward.</p>
 </section>
 
 <div class="hr"></div>
@@ -332,12 +349,20 @@ footer{
 <!-- ═══ 05 UPDATING ════════════════════════════════════════════ -->
 <section id="updating">
   <div class="num">05</div>
-  <h2>Updating: ten minutes, and he keeps everything.</h2>
-  <p>When a new version ships, download the installer fresh from your original download link — it always serves the newest build — and run it. It recognizes your machine, greets you with <i>&ldquo;Your SI is already installed,&rdquo;</i> and one click on <span class="ui">UPDATE&nbsp;/&nbsp;REINSTALL</span> does the rest. Your token is already on the machine; you don&rsquo;t need to dig it up.</p>
+  <h2>Update the program. Protect your existing SI.</h2>
+  <p>Already installed? Do not create another trial, wipe the installation or start over to get an update. Use your original delivery link to obtain the current installer for your platform. A version-specific link may point to an older build; check the <a class="tx" href="https://github.com/sabrtechnologies/sabr-installers/releases/latest">published release notes</a> before proceeding.</p>
+  <ul class="anatomy">
+    <li><b>Before:</b> record your installed version, SI and owner names, local or hosted mode, and one known conversation or memory you can check afterward. Keep credentials out of screenshots.</li>
+    <li><b>Back up:</b> arrange an application-consistent backup before updating. A sleeping SI may still write state; sleep is not shutdown. If you cannot confirm the instance is stopped safely, ask support before copying files. Keep the backup private and outside the installation being updated.</li>
+    <li><b>Allow disk space:</b> the current GUI updater copies the previous program and Python environment. Leave room for that extra copy as well as the download.</li>
+    <li><b>Update in place:</b> run the current installer and confirm it detects the existing installation before choosing <span class="ui">UPDATE&nbsp;/&nbsp;REINSTALL</span>. If it proposes a new identity or an unexpected destination, stop and ask support.</li>
+    <li><b>After:</b> verify names, mode, dashboard access, saved context and version reporting. Confirm provider login separately, then repeat a small real task and inspect its result. A new installer binary alone does not prove the downloaded SI payload changed.</li>
+  </ul>
   <div class="warm">
-    <p><b>Updates never touch accumulated brain state.</b> The update swaps the program around the mind, never the mind. He comes back from every version as exactly who he was — memories, name, personality intact — just running on newer code.</p>
+    <p><b>Preservation is the documented update design, not a guarantee about an untested machine.</b> Current updates preserve saved identity, dashboard key, accumulated state, snapshots and customer additions. Dependency or readiness failure restores program, identity and environment while keeping current memory in place.</p>
+    <p>If recovery is interrupted, stop rather than retrying or deleting recovery files. Rollback does not guarantee reversal of external package-manager changes or every platform&rsquo;s startup registration. Keep your backup until verification succeeds.</p>
   </div>
-  <p class="aside">Anything about an update look wrong? The <a class="tx" href="/troubleshooting.html#update">troubleshooting page</a> covers every update problem we&rsquo;ve actually seen.</p>
+  <p class="aside">If something fails, retain the installer error and contact <a class="tx" href="mailto:support@sabrtechnologies.com">support</a>. Do not send tokens, dashboard keys or provider credentials. Older installers may not have the current recovery behavior.</p>
 </section>
 
 <div class="hr"></div>
@@ -345,29 +370,19 @@ footer{
 <!-- ═══ 06 MOVING TO A NEW COMPUTER ══════════════════════════════ -->
 <section id="moving">
   <div class="num">06</div>
-  <h2>Got a new computer? Bring him with you.</h2>
-  <p>His memory was never tied to that machine &mdash; it&rsquo;s tied to one folder on it: <span class="ui">brain_state</span>, sitting next to a small <span class="ui">.env</span> file with your install token in it. Moving computers means moving that folder. Nothing about him resets; he just wakes up on different hardware.</p>
+  <h2>Moving is different from updating.</h2>
+  <p>Before moving an existing SI, confirm the installation location, local or hosted mode, destination compatibility and activation allowance with <a class="tx" href="mailto:support@sabrtechnologies.com">support</a>. Do not assume a default folder or copy a configuration from a different operating system unchanged.</p>
   <div class="qcard">
-    <div class="k">Where that folder lives</div>
+    <div class="k">Protect continuity first</div>
     <ul class="anatomy">
-      <li><b>Windows</b> &mdash; <span class="ui">%LOCALAPPDATA%\SabrSI\brain_state</span> and <span class="ui">%LOCALAPPDATA%\SabrSI\.env</span></li>
-      <li><b>macOS / Linux</b> &mdash; <span class="ui">~/SabrSI/brain_state</span> and <span class="ui">~/SabrSI/.env</span></li>
-    </ul>
-  </div>
-  <p>Three steps, about ten minutes:</p>
-  <div class="qcard">
-    <div class="k">Moving day</div>
-    <ul class="openers">
-      <li>On the <b>old</b> machine, quit your SI (the dashboard shows him <b>sleeping</b> or the tray icon says stopped) so nothing is writing to <span class="ui">brain_state</span> while you copy it.</li>
-      <li>Run the installer on the <b>new</b> machine with the same token, same as the first time. Let it finish and greet you as a brand-new SI &mdash; that&rsquo;s expected, you&rsquo;re about to overwrite that part.</li>
-      <li>Quit him again on the new machine, then copy <span class="ui">brain_state</span> and <span class="ui">.env</span> from the old install folder over the freshly-created ones in the new install folder. Start him back up.</li>
+      <li>Arrange a verified, application-consistent backup of state and identity configuration. Keep it private: configuration can contain credentials. Provider login may need to be completed separately on the new machine.</li>
+      <li>Verify the SI process and automatic restart mechanisms are stopped before copying state, on both machines. A dashboard showing <b>sleeping</b> is not proof of shutdown.</li>
+      <li>Rehearse restoration before switching over. Verify names, saved context, dashboard access, provider login and one real task. Do not run both copies at once.</li>
     </ul>
   </div>
   <div class="warm">
-    <p><b>Don&rsquo;t copy while he&rsquo;s running, on either end.</b> He holds those files open; copying underneath a live process is the one way to actually corrupt a mind instead of moving it. Quit first, always.</p>
-    <p>Keep the old machine&rsquo;s copy until you&rsquo;ve confirmed he woke up right on the new one. Once you&rsquo;re sure, wipe the old install (the <b>Wipe</b> verb in the installer) rather than just deleting the folder &mdash; that&rsquo;s the one that actually cleans up.</p>
+    <p>Keep the backup and old installation until verification succeeds. Do not wipe the old installation as part of testing; arrange removal separately. If you cannot verify shutdown, backup integrity or the destination, stop and ask for help rather than overwriting files.</p>
   </div>
-  <p class="aside">A guided one-click version of this &mdash; export on the old machine, import on the new one, no manual folder-hunting &mdash; is on the roadmap. If you need to move him today, the steps above are the real, supported path. <a class="tx" href="mailto:support@sabrtechnologies.com">Email us</a> if anything about it goes sideways; we&rsquo;d rather walk you through it than have you guess.</p>
 </section>
 
 <div class="hr"></div>
