@@ -615,6 +615,61 @@ footer{
   #buy-list .cards{ grid-template-columns:repeat(2,1fr); }
 }
 @media (max-width:760px){ #buy-list .cards{ grid-template-columns:1fr; } }
+
+/* ── compare, founding-rate tables, starter guide, feed ───────── */
+.sr-only{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.vs-table, .rate-table{ width:100%; border-collapse:separate; border-spacing:0; margin-top:44px;
+  border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:var(--surface); }
+.vs-table th, .vs-table td, .rate-table th, .rate-table td{ text-align:left; vertical-align:top;
+  padding:18px 22px; font-size:14.5px; line-height:1.65; color:var(--ink-2);
+  border-bottom:1px solid var(--line); }
+.vs-table tbody tr:last-child > *, .rate-table tbody tr:last-child > *{ border-bottom:0; }
+.vs-table thead th, .rate-table thead th{ font-family:var(--display); font-stretch:125%;
+  font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); background:var(--surface-2); }
+.vs-table thead th.ours{ color:var(--acc); }
+.vs-table tbody th{ width:17%; color:var(--ink); font-weight:600; }
+.vs-table td.ours{ color:var(--ink); background:var(--surface-acc); }
+.rate-table tr.now td, .rate-table tr.now th{ color:var(--ink); background:var(--surface-acc); }
+.rate-table tbody th{ color:var(--ink); font-weight:600; }
+.table-note{ margin-top:22px; font-size:14px; color:var(--ink-3); max-width:46em; line-height:1.7; }
+.guide-h{ font-family:var(--display); font-stretch:125%; font-size:20px; font-weight:700;
+  letter-spacing:-.01em; margin-top:56px; }
+#buy-list .guide-h + .cards{ margin-top:22px; }
+.guide{ list-style:none; counter-reset:gd; display:grid; grid-template-columns:repeat(2,1fr);
+  gap:14px; margin-top:22px; }
+.guide li{ counter-increment:gd; padding:26px 24px; border-radius:var(--radius);
+  background:var(--surface); border:1px solid var(--line); font-size:14.5px;
+  color:var(--ink-2); line-height:1.7; }
+.guide li::before{ content:counter(gd, decimal-leading-zero); display:block;
+  font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; font-weight:600;
+  letter-spacing:.2em; color:var(--acc); margin-bottom:10px; }
+.guide li b{ display:block; color:var(--ink); font-size:16px; font-weight:600; margin-bottom:6px; }
+.guide a{ color:var(--acc); text-decoration:none; border-bottom:1px solid rgba(238,90,84,.4); }
+.guide a:hover{ color:var(--ink); }
+.feed{ list-style:none; margin:44px 0 0 6px; border-left:1px solid var(--line); }
+.feed li{ position:relative; padding:0 0 30px 28px; }
+.feed li:last-child{ padding-bottom:0; }
+.feed li::before{ content:''; position:absolute; left:-5px; top:7px; width:9px; height:9px;
+  border-radius:50%; background:var(--acc); }
+.feed time{ display:block; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px;
+  letter-spacing:.16em; color:var(--acc); margin-bottom:6px; }
+.feed b{ display:block; color:var(--ink); font-size:16.5px; font-weight:600; }
+.feed p{ margin-top:4px; font-size:14.5px; color:var(--ink-2); line-height:1.7; max-width:44em; }
+.feed .ref{ display:inline-block; margin-top:6px; font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  font-size:12px; color:var(--ink-3); }
+@media (max-width:760px){
+  .guide{ grid-template-columns:1fr; }
+  .vs-table, .vs-table tbody, .vs-table tr, .vs-table th, .vs-table td{ display:block; width:auto; }
+  .vs-table thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+  .vs-table tbody th{ width:auto; padding:18px 20px 8px; border-bottom:0; background:var(--surface-2); }
+  .vs-table td{ padding:14px 20px; }
+  .vs-table td::before{ content:attr(data-label); display:block; margin-bottom:4px; font-size:11px;
+    font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); }
+  .vs-table td.ours::before{ color:var(--acc); }
+  .rate-table th, .rate-table td{ padding:14px 14px; font-size:14px; }
+}
 </style>
 </head>
 <body>
@@ -861,6 +916,26 @@ footer{
 
 <div class="hr"></div>
 
+<!-- ═══ OLD WAY vs OUR WAY ═════════════════════════════════════ -->
+<section id="compare">
+  <div class="eyebrow">Old way, our way</div>
+  <h2 class="rv">The same job,<br>done differently.</h2>
+  <p class="lead">What changes when your assistant is a mind that keeps existing on your machine, instead of a window that resets.</p>
+  <table class="vs-table">
+    <caption class="sr-only">Comparison of a typical chatbot with a Sabr SI</caption>
+    <thead><tr><th scope="col"><span class="sr-only">Topic</span></th><th scope="col">The old way</th><th scope="col" class="ours">Our way</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Memory</th><td data-label="The old way">A chatbot is a stranger each time the window opens.</td><td data-label="Our way" class="ours">Saved context persists in brain state on your installation. Check what your SI recalls; persistence is not perfect recall.</td></tr>
+      <tr><th scope="row">Where it lives</th><td data-label="The old way">A tab in someone else's service.</td><td data-label="Our way" class="ours">A mind on your own machine. Hosted models and integrations still use their own services.</td></tr>
+      <tr><th scope="row">Updates</th><td data-label="The old way">Switching or reinstalling tools means explaining yourself again.</td><td data-label="Our way" class="ours">Updates are designed to preserve identity and saved state. Back up first and verify afterward.</td></tr>
+      <tr><th scope="row">Setup</th><td data-label="The old way">Sign up and start typing. Nothing installed, nothing that continues.</td><td data-label="Our way" class="ours">Install once with a token, then say hello. Build it yourself for free, or have Sabr install it.</td></tr>
+      <tr><th scope="row">Support</th><td data-label="The old way">Often a ticket queue.</td><td data-label="Our way" class="ours">With Care, a person reads every message.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="hr"></div>
+
 <!-- ═══ PRICING ════════════════════════════════════════════════ -->
 <section id="buy">
   <div class="eyebrow">How it's sold</div>
@@ -906,11 +981,11 @@ footer{
       <div class="tier-flag">Recommended</div>
       <div class="pn">Care</div>
       <div class="pr"><span class="amt" data-cfg="tiers.care.price">$199</span><span data-cfg="tiers.care.per"> / month</span></div>
-      <div class="pk">Updates, support and your install-token path.</div>
-      <div class="pd">Keep your SI current without gambling with who it is. Updates are designed to preserve its memory and identity, and Sabr is there when something looks wrong.</div>
+      <div class="pk">A mind with memory, and support behind it.</div>
+      <div class="pd">Care keeps your SI being itself. Its memory and identity stay on your machine and keep growing, updates are designed never to erase them, and Sabr is there when something looks wrong. Back up before every update anyway.</div>
       <ul>
-        <li>Updates designed to keep your SI's memory and identity intact</li>
-        <li>Support from Sabr</li>
+        <li>Updates designed never to erase your SI's memory or identity</li>
+        <li>Support from Sabr when something looks wrong</li>
         <li>Your install token, issued and kept working</li>
         <li>Installer downloads for macOS, Windows and Linux</li>
       </ul>
@@ -978,10 +1053,32 @@ footer{
 
 <div class="hr"></div>
 
+<!-- ═══ FOUNDING RATE ═══════════════════════════════════════════
+     Values live in SITE_CONFIG.founding (PLACEHOLDER). No seat counts or
+     dates have been given, so none appear here. -->
+<section id="founding-rate">
+  <div class="eyebrow">Founding rate</div>
+  <h2 class="rv">Care is at its<br>founding rate.</h2>
+  <p class="lead">The Care rate is designed to rise in steps. When each step happens, and what it costs, has not been announced. The table is a template Sabr will fill in on this page. Sabr confirms the amount with you before you pay.</p>
+  <table class="rate-table">
+    <caption class="sr-only">Care rate steps</caption>
+    <thead><tr><th scope="col">Step</th><th scope="col">Care rate</th><th scope="col">When</th></tr></thead>
+    <tbody>
+      <tr class="now"><th scope="row" data-cfg="founding.steps.0.name">Founding rate</th><td data-cfg="founding.steps.0.rate">$199 / month</td><td data-cfg="founding.steps.0.when">Now</td></tr>
+      <tr><th scope="row" data-cfg="founding.steps.1.name">Next step</th><td data-cfg="founding.steps.1.rate">To be announced</td><td data-cfg="founding.steps.1.when">To be announced</td></tr>
+      <tr><th scope="row" data-cfg="founding.steps.2.name">Standard rate</th><td data-cfg="founding.steps.2.rate">To be announced</td><td data-cfg="founding.steps.2.when">To be announced</td></tr>
+    </tbody>
+  </table>
+  <p class="table-note">Whether an earlier rate carries forward to existing members has not been decided. Ask Sabr before you subscribe.</p>
+</section>
+
+<div class="hr"></div>
+
 <section id="buy-list">
-  <div class="eyebrow">Buy-list guide</div>
-  <h2 class="rv">Building it yourself?<br>What to have ready.</h2>
-  <p class="lead">A plain checklist for the Free path, taken from the setup requirements in the <a href="/quickstart.html#before">quickstart</a>. <b>Sabr does not sell or resell hardware</b>, and this list names no models, vendors or prices. Buy from a source you trust.</p>
+  <div class="eyebrow">Free starter guide</div>
+  <h2 class="rv">Building it yourself?<br>Start here.</h2>
+  <p class="lead">The Free path, start to finish, taken from the setup requirements in the <a href="/quickstart.html#before">quickstart</a>. <b>Sabr does not sell or resell hardware</b>, and this guide names no models, vendors or prices. Buy from a source you trust.</p>
+  <h3 class="guide-h">What to have ready</h3>
   <div class="cards">
     <div class="card"><h3>A machine you can leave on</h3><p>An SI runs continuously on your own computer. Pick Windows, Linux, or macOS, and match the installer to your processor: Apple Silicon and Intel Mac downloads differ.</p></div>
     <div class="card"><h3>Room on disk</h3><p>Downloads need space. The current GUI updater also copies the previous program and its Python environment, so leave room for that extra copy.</p></div>
@@ -990,7 +1087,39 @@ footer{
     <div class="card"><h3>Somewhere private for backups</h3><p>Keep verified backups outside the installation, and take one before every update. Persistence is not perfect recall or protection from disk failure.</p></div>
     <div class="card"><h3>Optional: camera and microphone</h3><p>Only if you want your SI to see and hear. It works through the computer it lives on.</p></div>
   </div>
+  <h3 class="guide-h">What to do, in order</h3>
+  <ol class="guide" id="starter-guide">
+    <li><b>Match the installer to your machine</b>Windows, Linux or macOS. Apple Silicon and Intel Mac downloads differ. Read the release notes before you run anything. A native build does not certify every machine.</li>
+    <li><b>Leave room and time</b>Setup downloads dependencies and needs network access and disk space. Coding setup also needs Git and its managed runtime. Follow errors rather than assuming a stalled install worked.</li>
+    <li><b>Run the installer with your token</b>Use the token from your purchase or trial delivery page, and keep it private. Name your SI, then open the dashboard the installer gives you.</li>
+    <li><b>Connect your provider</b>For coding jobs, sign into the Codex or Claude CLI through its normal local login, then choose provider, model and effort explicitly. Runtime readiness is not proof the login works.</li>
+    <li><b>Say hello, then one small task</b>Introduce yourself, give a short non-sensitive brief, and ask for three priorities and one next action. Check the answer against your notes. See <a href="/quickstart.html#first">the first conversation</a>.</li>
+    <li><b>Back up before every update</b>Keep private, verified backups outside the installation. Follow the <a href="/quickstart.html#updating">update checklist</a> and check your saved context afterward.</li>
+  </ol>
   <p class="buylist-note">Check the <a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener">latest release notes</a> for requirements before you buy; a native build does not certify every machine. Prefer not to do it yourself? <a href="#pricing" class="link-acc">Done-for-you</a> installs on the hardware you bought.</p>
+</section>
+
+<div class="hr"></div>
+
+<!-- ═══ WHAT LEON LEARNED OR BUILT ═════════════════════════════
+     STATIC, hand-updated feed. The CSP blocks live fetches, so nothing is
+     loaded at runtime. Every entry below comes from this repo's git log.
+     TEMPLATE for a new weekly entry (newest first, never invent one):
+       <li><time datetime="YYYY-MM-DD">YYYY-MM-DD</time><b>Title</b>
+       <p>One plain sentence from the commit or release notes.</p>
+       <span class="ref">commit abc1234</span></li>  -->
+<section id="learned">
+  <div class="eyebrow">What Leon learned or built</div>
+  <h2 class="rv">Recent work,<br>straight from the log.</h2>
+  <p class="lead">A short, hand-kept list drawn from this site's own commit history and release commits. Newest first. Nothing here is generated or fetched live.</p>
+  <ol class="feed">
+    <li><time datetime="2026-11-02">2026-11-02</time><b>Three tiers on the pricing page</b><p>Free, Care and Done-for-you replaced the older plan cards, with a buy-list guide. Care and Done-for-you are arranged with Sabr directly for now.</p><span class="ref">commit aa53791</span></li>
+    <li><time datetime="2026-10-29">2026-10-29</time><b>Clearer workflows and safer onboarding</b><p>Practical SI workflows were clarified, and existing owners got a safer update and onboarding path.</p><span class="ref">commit 2c5b3fb</span></li>
+    <li><time datetime="2026-10-29">2026-10-29</time><b>Audited customer executor payload published</b><p>The customer Hermes executor payload was published after an audit.</p><span class="ref">commit 57bc742</span></li>
+    <li><time datetime="2026-10-20">2026-10-20</time><b>SI release d5d7e5367b9f</b><p>Local AI adapter, work-queue resume and build gate fixes.</p><span class="ref">commit b4bcf28</span></li>
+    <li><time datetime="2026-09-08">2026-09-08</time><b>Website security boundary hardened</b><p>The site's public-file and request handling was tightened.</p><span class="ref">commit a34b375</span></li>
+    <li><time datetime="2026-09-04">2026-09-04</time><b>Moving to a new computer</b><p>A guide for bringing your SI with you, plus a homepage teaser.</p><span class="ref">commit 232dd41</span></li>
+  </ol>
 </section>
 
 <div class="hr"></div>
@@ -1042,6 +1171,8 @@ footer{
         <a href="#si">What an SI is</a>
             <a href="#pricing">Get your SI</a>
         <a href="#pricing">Pricing</a>
+        <a href="#buy-list">Free starter guide</a>
+        <a href="#learned">What Leon learned</a>
       </div>
       <div class="foot-col">
         <div class="h">Company</div>
@@ -1123,7 +1254,7 @@ window.addEventListener('message', function(e){
    Stripe Checkout Session for the chosen plan and returns its URL. Promo
    codes are collected on Stripe's page.
    NOTE: no .buyBtn is on the page right now. The old "individual" plan bills
-   the old Founder amount on the Railway/Stripe side, so a $199 Care button
+   the old pre-revision amount on the Railway/Stripe side, so a $199 Care button
    must NOT be pointed at it. Once the Stripe price for Care is $199/month,
    change the Care link to class="pcc buyBtn" with its real data-plan. ── */
 (function () {
@@ -1145,6 +1276,15 @@ window.addEventListener('message', function(e){
       free:  { price: '$0',     per: ' / build it yourself' },  /* PLACEHOLDER: pricing under revision */
       care:  { price: '$199',   per: ' / month' },              /* PLACEHOLDER: pricing under revision */
       setup: { price: '$1,500', per: ' one-time setup' }        /* PLACEHOLDER: pricing under revision */
+    },
+    /* PLACEHOLDER: rising founding rate. No dates or seat counts have been
+       given, so none are invented. steps[0].rate must equal tiers.care. */
+    founding: {
+      steps: [
+        { name: 'Founding rate', rate: '$199 / month',    when: 'Now' },
+        { name: 'Next step',     rate: 'To be announced', when: 'To be announced' },
+        { name: 'Standard rate', rate: 'To be announced', when: 'To be announced' }
+      ]
     },
     SI_VERSION: 'v2026.10.29.1',
     RELEASES_URL: 'https://github.com/sabrtechnologies/sabr-installers/releases/latest'

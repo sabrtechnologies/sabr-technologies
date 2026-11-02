@@ -105,6 +105,12 @@ with sync_playwright() as p:
             check(f'{width} no hardware resale', 'does not sell or resell hardware' in page.locator('#pricing').inner_text())
             check(f'{width} no checkout button until Stripe price is set', page.locator('.buyBtn').count() == 0)
             check(f'{width} pricing no horizontal overflow', page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+            for sid in ('compare', 'founding-rate', 'buy-list', 'learned'):
+                check(f'{width} section #{sid} present', page.locator('#' + sid).count() == 1)
+            check(f'{width} founding rate matches Care price', page.locator('#founding-rate [data-cfg="founding.steps.0.rate"]').inner_text().startswith('$199'))
+            check(f'{width} starter guide has six steps', page.locator('#starter-guide li').count() == 6)
+            check(f'{width} learned feed has dated entries', page.locator('#learned .feed time').count() >= 1)
+            check(f'{width} new sections no horizontal overflow', page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
             page.locator('.contactCta[data-contact="careBox"]').click()
             check(f'{width} care contact reveals', page.locator('#careBox').is_visible())
             page.locator('#pricing').screenshot(path=str(OUT / f'pricing-{width}.png'))
