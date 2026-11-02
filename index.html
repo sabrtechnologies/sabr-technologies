@@ -557,6 +557,40 @@ footer{
      16px kills the auto-zoom; the visual size barely shifts. */
   #trialForm input{ font-size:16px; }
 }
+
+/* ── polish pass: classes replacing former inline styles ─────── */
+.hero-note-first{ margin-top:12px; }
+.link-acc{ color:var(--acc); font-weight:600; text-decoration:none; }
+.hero-release{ margin-top:10px; }
+.hero-release a, .release-line a{ color:var(--ink-2); text-decoration:none;
+  border-bottom:1px solid rgba(238,90,84,.4); }
+.hero-release a:hover, .release-line a:hover{ color:var(--ink); }
+.release-line{ margin-top:14px; font-size:14px; color:var(--ink-2); }
+.release-line b{ color:var(--ink); font-weight:600; }
+.fine-gap{ margin-top:14px; }
+.aside-c{ text-align:center; margin-top:18px; }
+.plan .pr .amt{ font-size:inherit; font-weight:inherit; color:inherit; letter-spacing:inherit; }
+.plan{ transition:border-color .25s; }
+.plan:hover{ border-color:rgba(238,90,84,.3); }
+.price-note{ margin-top:22px; padding:14px 18px; max-width:46em; border-radius:var(--r-sm);
+  border:1px solid rgba(238,90,84,.34); background:var(--acc-soft);
+  font-size:14px; color:var(--ink-2); line-height:1.65; }
+.price-note b{ color:var(--ink); font-weight:600; }
+
+/* ── how it's sold: numbered buying path ─────────────────────── */
+.sold-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:48px; }
+.sold-grid .card{ padding:30px 28px; }
+.buypath{ list-style:none; display:grid; grid-template-columns:repeat(5,1fr); gap:14px;
+  margin-top:40px; counter-reset:bp; }
+.buypath li{ counter-increment:bp; padding:26px 22px; border-radius:var(--radius);
+  background:var(--surface); border:1px solid var(--line); font-size:14px;
+  color:var(--ink-2); line-height:1.65; }
+.buypath li::before{ content:counter(bp, decimal-leading-zero); display:block;
+  font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; font-weight:600;
+  letter-spacing:.2em; color:var(--acc); margin-bottom:12px; }
+.buypath li b{ display:block; color:var(--ink); font-size:16px; font-weight:600; margin-bottom:6px; }
+@media (max-width:1080px){ .buypath{ grid-template-columns:repeat(2,1fr); } .sold-grid{ grid-template-columns:1fr; } }
+@media (max-width:560px){ .buypath{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -594,8 +628,9 @@ footer{
       <a class="btn btn-solid" href="#pricing">Get your SI</a>
       <a class="btn btn-ghost" href="#start-small">See where to start</a>
     </div>
-    <div class="hero-note rv rv-3" style="margin-top:12px">Not sure yet? <a href="#trial" style="color:var(--acc);font-weight:600;text-decoration:none">Try one free for 24 hours</a>, no card.</div>
+    <div class="hero-note hero-note-first rv rv-3">Not sure yet? <a href="#trial" class="link-acc">Try one free for 24 hours</a>, no card.</div>
     <div class="hero-note rv rv-3">macOS &middot; Windows &middot; Linux</div>
+    <div class="hero-note hero-release rv rv-3">Latest release: <a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener"><span data-si-version>v2026.10.29.1</span></a></div>
   </div>
 </header>
 
@@ -749,6 +784,7 @@ footer{
   <div class="eyebrow">The installer</div>
   <h2 class="rv">One program.<br>Four verbs.</h2>
   <p class="lead">Choose the installer for your operating system and processor. Setup downloads dependencies; network access, platform permissions and provider sign-in may be needed. Read the <a href="/quickstart.html#before">setup checklist</a> before starting.</p>
+  <p class="release-line">Current release: <b data-si-version>v2026.10.29.1</b> &middot; <a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener">Latest release and notes</a></p>
 
   <div class="verbs">
     <div class="verb"><div class="v mono">install</div><p>Use your issued token to set up your SI, then verify the dashboard and a first conversation.</p></div>
@@ -768,11 +804,11 @@ footer{
         <p>After checkout, the delivery page checks payment and provides your token and download choices. Keep the token private. Follow the installer, open the dashboard it provides, then confirm your chosen provider can answer. Setup time depends on your machine and downloads.</p>
         <p class="dl-gate-fine">Windows and macOS may show first-launch security prompts. Verify the download source before proceeding; do not disable system protection. Existing owners should follow the <a href="/quickstart.html#updating">update guide</a>, not create a new trial.</p>
         <a class="btn btn-solid" href="#pricing">Get your SI</a>
-        <p class="dl-gate-fine" style="margin-top:14px">Want a taste first? <a href="#trial" style="color:var(--acc)">Start the 24-hour free trial</a>: no card, installer included.</p>
+        <p class="dl-gate-fine fine-gap">Want a taste first? <a href="#trial" class="link-acc">Start the 24-hour free trial</a>: no card, installer included.</p>
       </div>
     </div>
   </div>
-  <p class="aside" style="text-align:center; margin-top:18px">Got a new computer? <a class="tx" href="/quickstart.html#moving">Bring your SI with you</a> &mdash; his memory isn&rsquo;t tied to the hardware.</p>
+  <p class="aside aside-c">Got a new computer? <a class="tx" href="/quickstart.html#moving">Bring your SI with you</a> &mdash; his memory isn&rsquo;t tied to the hardware.</p>
 </section>
 
 <div class="hr"></div>
@@ -802,9 +838,31 @@ footer{
 <div class="hr"></div>
 
 <!-- ═══ PRICING ════════════════════════════════════════════════ -->
+<section id="buy">
+  <div class="eyebrow">How it's sold</div>
+  <h2 class="rv">A mind you license,<br>install and keep.</h2>
+  <p class="lead">A Sabr SI is a synthetic intelligence that runs on your own machine: a spiking neural brain with persistent memory, paired with a language model that gives it words. You license it, install it with a token, and it keeps its state on your machine.</p>
+  <div class="sold-grid">
+    <div class="card"><h3>What you get</h3><p>The brain, its tools and integrations, and the installer for macOS, Windows or Linux. Persistent memory stays in brain state on your installation.</p></div>
+    <div class="card"><h3>Who it's for</h3><p>People who want a continuous working relationship: research, study, building, running a business. Individuals start with Founder or Perpetual; companies are scoped as Business or Enterprise.</p></div>
+    <div class="card"><h3>How it's sold</h3><p>Founder is monthly or annual, Perpetual is a one-time purchase, Business and Enterprise are quoted. Or try a 24-hour trial with no card.</p></div>
+  </div>
+  <ol class="buypath">
+    <li><b>Pick a plan or trial</b>Choose Founder or Perpetual below, or start the free 24-hour trial.</li>
+    <li><b>Check out</b>Pay on the secure Stripe checkout page. Trials skip this step.</li>
+    <li><b>Receive your install token</b>The delivery page checks payment and shows your token. Keep it private.</li>
+    <li><b>Download the installer</b>Pick the installer for your operating system and processor.</li>
+    <li><b>Paste your token</b>Paste it into the installer, name your SI, and say hello.</li>
+  </ol>
+  <p class="lead">Read the <a href="/quickstart.html">quickstart guide</a> before you begin. Current release: <b data-si-version>v2026.10.29.1</b> &middot; <a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener">Latest release</a>.</p>
+</section>
+
+<div class="hr"></div>
+
 <section id="pricing">
   <div class="eyebrow">Investment</div>
   <h2 class="rv">The mind grows for<br>as long as you run it.</h2>
+  <p class="price-note" id="priceNote"><b>Pricing is being revised.</b> The figures below are current today and may change. Confirm the amount on the checkout page before you pay.</p>
   <div><div class="toggle">
     <button id="bMonth" class="on">Monthly</button>
     <button id="bYear">Annual &middot; 2 months free</button>
@@ -812,7 +870,7 @@ footer{
   <div class="plans">
     <div class="plan">
       <div class="pn">Founder</div>
-      <div class="pr"><span id="iAmt" style="font-size:inherit;font-weight:inherit;color:inherit;letter-spacing:inherit;">$7,499</span><span id="iPer"> / month</span></div>
+      <div class="pr"><span id="iAmt" class="amt">$7,499</span><span id="iPer"> / month</span></div>
       <div class="pk">No deployment fee. One person, one machine.</div>
       <div class="pd">A continuous mind of your own, for research, study, building, thinking out loud at 3am. It remembers you and keeps working while you sleep.</div>
       <ul>
@@ -829,7 +887,7 @@ footer{
     </div>
     <div class="plan">
       <div class="pn">Perpetual</div>
-      <div class="pr"><span style="font-size:inherit;font-weight:inherit;color:inherit;letter-spacing:inherit;">$46,500</span><span> one-time</span></div>
+      <div class="pr"><span id="pAmt" class="amt">$46,500</span><span> one-time</span></div>
       <div class="pk">Pay once. Own it forever. No subscription, ever.</div>
       <div class="pd">The full mind, yours outright. No install token to renew, no monthly bill, nothing that can lapse. The trade-off for owning it completely: no resale, no white-label, one machine, and you're on your own for support.</div>
       <ul>
@@ -1061,10 +1119,28 @@ window.addEventListener('message', function(e){
 (function () {
   var CHECKOUT_API = 'https://sabr-checkout-production.up.railway.app';
   var interval = 'month';
-  var PRICES = {
-    month: { i: ['$7,499', ' / month'] },
-    year:  { i: ['$74,990', ' / year'] }
+  /* ════════════════════════════════════════════════════════════════
+     SITE_CONFIG  --  PLACEHOLDER: pricing under revision
+     The ONE place to set final prices, SI version and release link.
+     Values below are today's live values, unchanged. The static HTML
+     keeps the same text as the no-JS fallback; keep both in step.
+     TODO: SI_VERSION is hand-set from the GitHub latest-release tag
+     (v2026.10.29.1, checked 2026-11-02). It is not read automatically
+     (CSP blocks the GitHub API). Update it on each SI release.
+     ════════════════════════════════════════════════════════════════ */
+  var SITE_CONFIG = {
+    founder:   { month: '$7,499', year: '$74,990' },   /* PLACEHOLDER: pricing under revision */
+    perpetual: '$46,500',                                /* PLACEHOLDER: pricing under revision */
+    SI_VERSION: 'v2026.10.29.1',
+    RELEASES_URL: 'https://github.com/sabrtechnologies/sabr-installers/releases/latest'
   };
+  var PRICES = {
+    month: { i: [SITE_CONFIG.founder.month, ' / month'] },
+    year:  { i: [SITE_CONFIG.founder.year, ' / year'] }
+  };
+  Array.prototype.forEach.call(document.querySelectorAll('[data-si-version]'), function (e) { e.textContent = SITE_CONFIG.SI_VERSION; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-release-link]'), function (e) { e.href = SITE_CONFIG.RELEASES_URL; });
+  var pa = document.getElementById('pAmt'); if (pa) pa.textContent = SITE_CONFIG.perpetual;
   function paint() {
     var p = PRICES[interval];
     var m = { iAmt: p.i[0], iPer: p.i[1] };
