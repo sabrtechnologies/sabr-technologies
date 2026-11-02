@@ -388,7 +388,6 @@ section{ position:relative; padding:clamp(90px, 12vw, 160px) var(--pad); max-wid
 #pricing .plan .pd{ grid-column:2; grid-row:1 / span 3; }
 #pricing .plan .pcc{ grid-column:2; grid-row:4; justify-self:start; }
 #pricing .plan .buyMsg{ grid-column:2; grid-row:5; }
-#pricing .plan #entBox,#pricing .plan #bizBox{ grid-column:2; grid-row:6; }
 #pricing .plan ul{ grid-column:3; grid-row:1 / span 6; margin-top:0; }
 #pricing .plan #trialForm{ grid-column:3; grid-row:1 / span 6; margin-top:0; }
 #pricing .plan #trialDone{ grid-column:3; grid-row:1 / span 6; }
@@ -416,14 +415,6 @@ section{ position:relative; padding:clamp(90px, 12vw, 160px) var(--pad); max-wid
 .wild-link a:hover{ color:#fff; border-color:#fff; }
 
 /* ── pricing ────────────────────────────────────────────────── */
-.toggle{ display:inline-flex; margin-top:40px; padding:4px; border-radius:0;
-  background:var(--surface); border:1px solid var(--line); }
-.toggle button{
-  font-family:inherit; font-size:13px; font-weight:600; letter-spacing:.01em;
-  color:var(--ink-2); background:transparent; border:0; border-radius:0;
-  padding:9px 20px; cursor:pointer; transition:.2s;
-}
-.toggle button.on{ color:#fff; background:#E01B15; }
 .plans{ display:flex; flex-direction:column; gap:16px; margin-top:36px; }
 .plan{
   display:flex; flex-direction:column; padding:40px 36px; border-radius:var(--radius);
@@ -454,13 +445,6 @@ section{ position:relative; padding:clamp(90px, 12vw, 160px) var(--pad); max-wid
                     100% 100%, 10px 100%, 0 calc(100% - 10px)); }
 .plan.hot .pcc:hover{ background:#FF3B35; border-color:rgba(255,255,255,.4); }
 .buyMsg{ font-size:12.5px; color:var(--ink-3); margin-top:10px; min-height:16px; }
-#entBox,#bizBox{ display:none; margin-top:12px; padding:16px; border:1px solid rgba(238,90,84,.34);
-  border-radius:var(--r-sm); background:rgba(255,59,53,.07); text-align:left; }
-#entBox .k,#bizBox .k{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#EE5A54; margin-bottom:6px; }
-#entMail{ font-size:15px; color:#fff; }
-#entCopy{ display:inline-block; margin-top:10px; font-size:12px; letter-spacing:.08em;
-  text-transform:uppercase; color:#EE5A54; text-decoration:none;
-  border-bottom:1px solid rgba(238,90,84,.45); }
 
 /* ── about / origin ─────────────────────────────────────────── */
 #about .lead{ max-width:30em; }
@@ -591,6 +575,46 @@ footer{
 .buypath li b{ display:block; color:var(--ink); font-size:16px; font-weight:600; margin-bottom:6px; }
 @media (max-width:1080px){ .buypath{ grid-template-columns:repeat(2,1fr); } .sold-grid{ grid-template-columns:1fr; } }
 @media (max-width:560px){ .buypath{ grid-template-columns:1fr; } }
+.buypath a, .buylist-note a, .sold-grid a{ color:var(--acc); text-decoration:none;
+  border-bottom:1px solid rgba(238,90,84,.4); }
+.buypath a:hover, .buylist-note a:hover{ color:var(--ink); }
+.sold-grid b{ color:var(--ink); font-weight:600; }
+
+/* ── three tiers: Free / Care / Done-for-you ─────────────────── */
+.tiers{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:36px; align-items:stretch; }
+#pricing .tiers .plan{ display:flex; flex-direction:column; position:relative; padding:44px 32px 36px; }
+#pricing .tiers .plan ul{ margin:22px 0 28px; flex:1; }
+#pricing .tiers .plan .pcc{ margin-top:auto; }
+#pricing .tiers .plan.hot{ border-color:rgba(255,59,53,.6); background:var(--surface-acc);
+  box-shadow:0 0 0 1px rgba(255,59,53,.25), 0 30px 80px -40px rgba(255,59,53,.45); }
+#pricing .tiers .plan.hot:hover{ border-color:rgba(255,59,53,.8); }
+.tier-flag{ position:absolute; top:0; left:32px; transform:translateY(-50%);
+  font-family:var(--display); font-stretch:125%; font-size:11px; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase; color:#fff; background:#E01B15;
+  padding:6px 14px; border:1px solid rgba(255,255,255,.22); }
+.tier .pr{ font-size:38px; }
+.tier .pk{ font-weight:600; color:var(--ink); }
+.tier .buyMsg a{ color:var(--ink-2); text-decoration:none; border-bottom:1px solid rgba(238,90,84,.4); }
+.tier .buyMsg a:hover{ color:var(--ink); }
+.contact-box{ margin-top:12px; padding:16px; border:1px solid rgba(238,90,84,.34);
+  border-radius:var(--r-sm); background:rgba(255,59,53,.07); text-align:left; }
+.contact-box[hidden]{ display:none; }
+.contact-box .k{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#EE5A54; margin-bottom:6px; }
+.contact-box .contact-mail{ font-size:15px; color:#fff; word-break:break-all; user-select:all; }
+.contact-box p{ margin-top:8px; font-size:13px; color:var(--ink-2); line-height:1.6; }
+.contact-copy{ display:inline-block; margin-top:10px; font-size:12px; letter-spacing:.08em;
+  text-transform:uppercase; color:#EE5A54; text-decoration:none;
+  border-bottom:1px solid rgba(238,90,84,.45); }
+.team-line{ margin-top:26px; font-size:14.5px; color:var(--ink-2); }
+#teamBox{ max-width:420px; }
+#pricing .plans{ margin-top:26px; }
+.buylist-note{ margin-top:28px; font-size:14.5px; color:var(--ink-2); max-width:46em; line-height:1.7; }
+#buy-list .cards{ grid-template-columns:repeat(3,1fr); margin-top:48px; }
+@media (max-width:1080px){
+  .tiers{ grid-template-columns:1fr; max-width:520px; margin-left:auto; margin-right:auto; gap:30px; }
+  #buy-list .cards{ grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:760px){ #buy-list .cards{ grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -841,16 +865,16 @@ footer{
 <section id="buy">
   <div class="eyebrow">How it's sold</div>
   <h2 class="rv">A mind you license,<br>install and keep.</h2>
-  <p class="lead">A Sabr SI is a synthetic intelligence that runs on your own machine: a spiking neural brain with persistent memory, paired with a language model that gives it words. You license it, install it with a token, and it keeps its state on your machine.</p>
+  <p class="lead">A Sabr SI is a synthetic intelligence that runs on your own machine: a spiking neural brain with persistent memory, paired with a language model that gives it words. Build it yourself for free, or let Sabr install it and keep it healthy.</p>
   <div class="sold-grid">
     <div class="card"><h3>What you get</h3><p>The brain, its tools and integrations, and the installer for macOS, Windows or Linux. Persistent memory stays in brain state on your installation.</p></div>
-    <div class="card"><h3>Who it's for</h3><p>People who want a continuous working relationship: research, study, building, running a business. Individuals start with Founder or Perpetual; companies are scoped as Business or Enterprise.</p></div>
-    <div class="card"><h3>How it's sold</h3><p>Founder is monthly or annual, Perpetual is a one-time purchase, Business and Enterprise are quoted. Or try a 24-hour trial with no card.</p></div>
+    <div class="card"><h3>Who it's for</h3><p>People who want a continuous working relationship: research, study, building, running a business. Build it yourself, or have Sabr install it for you.</p></div>
+    <div class="card"><h3>How it's sold</h3><p>Three tiers: <b>Free</b> (<span data-cfg="tiers.free.price">$0</span>, build it yourself), <b>Care</b> (<span data-cfg="tiers.care.price">$199</span><span data-cfg="tiers.care.per"> / month</span>) and <b>Done-for-you</b> (<span data-cfg="tiers.setup.price">$1,500</span><span data-cfg="tiers.setup.per"> one-time setup</span>, then Care). Sabr does not sell or resell hardware. Or try a 24-hour trial with no card.</p></div>
   </div>
   <ol class="buypath">
-    <li><b>Pick a plan or trial</b>Choose Founder or Perpetual below, or start the free 24-hour trial.</li>
-    <li><b>Check out</b>Pay on the secure Stripe checkout page. Trials skip this step.</li>
-    <li><b>Receive your install token</b>The delivery page checks payment and shows your token. Keep it private.</li>
+    <li><b>Pick a path</b>Free, Care, Done-for-you, or the free 24-hour trial.</li>
+    <li><b>Bring your hardware</b>You buy the machine. Sabr does not sell or resell hardware. See the <a href="#buy-list">buy-list guide</a>.</li>
+    <li><b>Get your install token</b>Care and the trial provide a token. Keep it private. With Done-for-you, Sabr handles the install.</li>
     <li><b>Download the installer</b>Pick the installer for your operating system and processor.</li>
     <li><b>Paste your token</b>Paste it into the installer, name your SI, and say hello.</li>
   </ol>
@@ -860,92 +884,73 @@ footer{
 <div class="hr"></div>
 
 <section id="pricing">
-  <div class="eyebrow">Investment</div>
-  <h2 class="rv">The mind grows for<br>as long as you run it.</h2>
-  <p class="price-note" id="priceNote"><b>Pricing is being revised.</b> The figures below are current today and may change. Confirm the amount on the checkout page before you pay.</p>
-  <div><div class="toggle">
-    <button id="bMonth" class="on">Monthly</button>
-    <button id="bYear">Annual &middot; 2 months free</button>
-  </div></div>
+  <div class="eyebrow">Pricing</div>
+  <h2 class="rv">Build it yourself,<br>or have us keep it healthy.</h2>
+  <p class="price-note" id="priceNote"><b>Pricing is being revised.</b> Care and Done-for-you are arranged with Sabr directly for now. Sabr confirms the amount with you before you pay.</p>
+  <div class="tiers">
+    <div class="plan tier">
+      <div class="pn">Free</div>
+      <div class="pr"><span class="amt" data-cfg="tiers.free.price">$0</span><span data-cfg="tiers.free.per"> / build it yourself</span></div>
+      <div class="pk">The software and a buy-list guide.</div>
+      <div class="pd">For people who build it themselves. You choose and buy the machine, follow the guide, and run the installer. No Sabr fee. Support and managed updates are part of Care.</div>
+      <ul>
+        <li>The software, from the public releases page</li>
+        <li>A buy-list guide for the machine you supply</li>
+        <li>The quickstart and update guides</li>
+        <li>Your hardware, your setup, your provider accounts</li>
+      </ul>
+      <a href="#buy-list" class="pcc">Read the buy-list guide</a>
+      <div class="buyMsg"><a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener">Latest release: <span data-si-version>v2026.10.29.1</span></a></div>
+    </div>
+    <div class="plan tier hot">
+      <div class="tier-flag">Recommended</div>
+      <div class="pn">Care</div>
+      <div class="pr"><span class="amt" data-cfg="tiers.care.price">$199</span><span data-cfg="tiers.care.per"> / month</span></div>
+      <div class="pk">Updates, support and your install-token path.</div>
+      <div class="pd">Keep your SI current without gambling with who it is. Updates are designed to preserve its memory and identity, and Sabr is there when something looks wrong.</div>
+      <ul>
+        <li>Updates designed to keep your SI's memory and identity intact</li>
+        <li>Support from Sabr</li>
+        <li>Your install token, issued and kept working</li>
+        <li>Installer downloads for macOS, Windows and Linux</li>
+      </ul>
+      <a href="#" class="pcc contactCta" data-contact="careBox">Get Care</a>
+      <div class="buyMsg"></div>
+      <div class="contact-box" id="careBox" hidden>
+        <div class="k">Reach Dean directly</div>
+        <div class="contact-mail">deansabrwork@gmail.com</div>
+        <p>Say you want Care. Sabr confirms the amount before you pay.</p>
+        <a href="#" class="contact-copy">Copy address</a>
+      </div>
+    </div>
+    <div class="plan tier">
+      <div class="pn">Done-for-you</div>
+      <div class="pr"><span class="amt" data-cfg="tiers.setup.price">$1,500</span><span data-cfg="tiers.setup.per"> one-time setup</span></div>
+      <div class="pk">Sabr installs it. Then Care, <span data-cfg="tiers.care.price">$199</span><span data-cfg="tiers.care.per"> / month</span>.</div>
+      <div class="pd">Sabr sets up your SI on hardware you buy. Sabr does not sell or resell hardware: you choose and own the machine, Sabr does the install and then keeps it healthy under Care.</div>
+      <ul>
+        <li>Sabr installs your SI on your hardware</li>
+        <li>Install, dashboard and first conversation checked with you</li>
+        <li>Then Care monthly: updates, support, install token</li>
+        <li>Hardware is yours to buy; Sabr does not sell or resell it</li>
+      </ul>
+      <a href="#" class="pcc contactCta" data-contact="doneBox">Ask for setup</a>
+      <div class="buyMsg"></div>
+      <div class="contact-box" id="doneBox" hidden>
+        <div class="k">Reach Dean directly</div>
+        <div class="contact-mail">deansabrwork@gmail.com</div>
+        <p>Say you want Done-for-you. Sabr confirms the amount before you pay.</p>
+        <a href="#" class="contact-copy">Copy address</a>
+      </div>
+    </div>
+  </div>
+  <p class="team-line">Running this for a company or team? <a href="#" class="link-acc contactCta" data-contact="teamBox">Talk to us</a> about a custom deployment.</p>
+  <div class="contact-box" id="teamBox" hidden>
+    <div class="k">Reach Dean directly</div>
+    <div class="contact-mail">deansabrwork@gmail.com</div>
+    <a href="#" class="contact-copy">Copy address</a>
+  </div>
   <div class="plans">
-    <div class="plan">
-      <div class="pn">Founder</div>
-      <div class="pr"><span id="iAmt" class="amt">$7,499</span><span id="iPer"> / month</span></div>
-      <div class="pk">No deployment fee. One person, one machine.</div>
-      <div class="pd">A continuous mind of your own, for research, study, building, thinking out loud at 3am. It remembers you and keeps working while you sleep.</div>
-      <ul>
-        <li>The full spiking brain, all 18 regions, on your machine</li>
-        <li>All 34 tools and integrations</li>
-        <li>Voice conversation with premium TTS</li>
-        <li>Image, video, and music generation</li>
-        <li>Persistent memory across restarts</li>
-        <li>One machine activation</li>
-        <li>Automatic over-the-air updates</li>
-      </ul>
-      <a href="#" class="pcc buyBtn" data-plan="individual">Start Instantly</a>
-      <div class="buyMsg"></div>
-    </div>
-    <div class="plan">
-      <div class="pn">Perpetual</div>
-      <div class="pr"><span id="pAmt" class="amt">$46,500</span><span> one-time</span></div>
-      <div class="pk">Pay once. Own it forever. No subscription, ever.</div>
-      <div class="pd">The full mind, yours outright. No install token to renew, no monthly bill, nothing that can lapse. The trade-off for owning it completely: no resale, no white-label, one machine, and you're on your own for support.</div>
-      <ul>
-        <li>The full spiking brain, all 18 regions, on your machine</li>
-        <li>All 34 tools and integrations</li>
-        <li>Voice conversation with premium TTS</li>
-        <li>Image, video, and music generation</li>
-        <li>Persistent memory across restarts</li>
-        <li>One machine activation, forever, no renewal</li>
-        <li>Not for resale or white-label use</li>
-      </ul>
-      <a href="#" class="pcc buyBtn" data-plan="perpetual">Buy It Outright</a>
-      <div class="buyMsg"></div>
-    </div>
-    <div class="plan hot">
-      <div class="pn">Business</div>
-      <div class="pr">Custom quote</div>
-      <div class="pk">Priced per deployment. We scope it with you before anything is quoted.</div>
-      <div class="pd">A mind embedded in how your company runs. It answers every lead in seconds, works your operations around the clock, and is built to your business during a deployment done by hand.</div>
-      <ul>
-        <li>Everything in Founder</li>
-        <li>Built to your business during deployment</li>
-        <li>Sub-agent parallel delegation</li>
-        <li>Phone number: it calls and texts</li>
-        <li>Onboarding call with Dean</li>
-        <li>Priority support from founder</li>
-        <li>Two machine activations</li>
-      </ul>
-      <a href="#" class="pcc bizCta" id="bizCta">Get a Quote</a>
-      <div class="buyMsg"></div>
-      <div id="bizBox">
-        <div class="k">Reach Dean directly</div>
-        <div id="bizMail">deansabrwork@gmail.com</div>
-        <a href="#" id="bizCopy">Copy address</a>
-      </div>
-    </div>
-    <div class="plan">
-      <div class="pn">Enterprise</div>
-      <div class="pr">Let's talk</div>
-      <div class="pk">Priced per engagement: cash, equity, or a blend.</div>
-      <div class="pd">For organizations putting synthetic intelligence into the core of their operations. Custom brain work and integrations built for you. If the fit is right, we may take a stake in your company for ongoing use instead of cash; we would rather grow with you than invoice you.</div>
-      <ul>
-        <li>Everything in Business</li>
-        <li>Multi-user team deployment</li>
-        <li>Custom brain modifications</li>
-        <li>Custom integrations built for you</li>
-        <li>Dedicated support channel</li>
-        <li>Equity partnership option</li>
-        <li>White-label available</li>
-      </ul>
-      <a href="#" class="pcc" id="entCta">Talk to Us</a>
-      <div class="buyMsg"></div>
-      <div id="entBox">
-        <div class="k">Reach Dean directly</div>
-        <div id="entMail">deansabrwork@gmail.com</div>
-        <a href="#" id="entCopy">Copy address</a>
-      </div>
-    </div>
     <div class="plan trial-card" id="trial">
       <div class="pn">24-Hour Trial</div>
       <div class="pr">$0</div>
@@ -969,6 +974,23 @@ footer{
       </div>
     </div>
   </div>
+</section>
+
+<div class="hr"></div>
+
+<section id="buy-list">
+  <div class="eyebrow">Buy-list guide</div>
+  <h2 class="rv">Building it yourself?<br>What to have ready.</h2>
+  <p class="lead">A plain checklist for the Free path, taken from the setup requirements in the <a href="/quickstart.html#before">quickstart</a>. <b>Sabr does not sell or resell hardware</b>, and this list names no models, vendors or prices. Buy from a source you trust.</p>
+  <div class="cards">
+    <div class="card"><h3>A machine you can leave on</h3><p>An SI runs continuously on your own computer. Pick Windows, Linux, or macOS, and match the installer to your processor: Apple Silicon and Intel Mac downloads differ.</p></div>
+    <div class="card"><h3>Room on disk</h3><p>Downloads need space. The current GUI updater also copies the previous program and its Python environment, so leave room for that extra copy.</p></div>
+    <div class="card"><h3>Network access for setup</h3><p>Setup downloads dependencies. Customer coding setup also needs Git and its managed runtime dependencies.</p></div>
+    <div class="card"><h3>A model provider account</h3><p>For customer coding jobs, sign into the Codex or Claude CLI through its normal local login. Hosted models and integrations use their own services; local brain state is not offline processing.</p></div>
+    <div class="card"><h3>Somewhere private for backups</h3><p>Keep verified backups outside the installation, and take one before every update. Persistence is not perfect recall or protection from disk failure.</p></div>
+    <div class="card"><h3>Optional: camera and microphone</h3><p>Only if you want your SI to see and hear. It works through the computer it lives on.</p></div>
+  </div>
+  <p class="buylist-note">Check the <a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener">latest release notes</a> for requirements before you buy; a native build does not certify every machine. Prefer not to do it yourself? <a href="#pricing" class="link-acc">Done-for-you</a> installs on the hardware you bought.</p>
 </section>
 
 <div class="hr"></div>
@@ -1075,84 +1097,67 @@ window.addEventListener('message', function(e){
 /* parallax + hero particle canvas removed 08-25: two of seven simultaneous
    ambient systems too many. The page holds still; the brain moves. */
 
-/* ── Business contact reveal — Business is quoted, never self-serve ── */
+/* ── Contact reveal. Care, Done-for-you and team deployments are arranged
+   with Sabr directly until the Stripe price for Care is set (see AUDIT.md);
+   nothing here ever opens a mailto handoff. ── */
 (function () {
-  var c = document.getElementById('bizCta'),
-      box = document.getElementById('bizBox'),
-      cp = document.getElementById('bizCopy');
-  if (!c || !box) return;
-  c.addEventListener('click', function (e) {
-    e.preventDefault();
-    box.style.display = 'block';
-    c.textContent = 'Get a Quote. Details below';
+  var EMAIL = 'deansabrwork@gmail.com';
+  Array.prototype.forEach.call(document.querySelectorAll('.contactCta'), function (c) {
+    var box = document.getElementById(c.getAttribute('data-contact'));
+    if (!box) return;
+    c.addEventListener('click', function (e) {
+      e.preventDefault();
+      box.hidden = false;
+      c.setAttribute('aria-expanded', 'true');
+    });
   });
-  if (cp) cp.addEventListener('click', function (e) {
-    e.preventDefault();
-    var done = function () { cp.textContent = 'Copied'; };
-    if (navigator.clipboard) navigator.clipboard.writeText('deansabrwork@gmail.com').then(done, done);
-    else done();
-  });
-})();
-
-/* ── Enterprise contact reveal (never a mailto handoff) ─────── */
-(function () {
-  var c = document.getElementById('entCta'),
-      box = document.getElementById('entBox'),
-      cp = document.getElementById('entCopy');
-  if (!c || !box) return;
-  c.addEventListener('click', function (e) {
-    e.preventDefault();
-    box.style.display = 'block';
-    c.textContent = 'Talk to Us. Details below';
-  });
-  if (cp) cp.addEventListener('click', function (e) {
-    e.preventDefault();
-    var done = function () { cp.textContent = 'Copied'; };
-    if (navigator.clipboard) navigator.clipboard.writeText('deansabrwork@gmail.com').then(done, done);
-    else done();
+  Array.prototype.forEach.call(document.querySelectorAll('.contact-copy'), function (cp) {
+    cp.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (window.SabrUI && window.SabrUI.copy) window.SabrUI.copy(EMAIL, cp);
+    });
   });
 })();
 
 /* ── Checkout: hand off to the Sabr checkout service, which mints a live
    Stripe Checkout Session for the chosen plan and returns its URL. Promo
-   codes are collected on Stripe's page, so founder rates need no code here. */
+   codes are collected on Stripe's page.
+   NOTE: no .buyBtn is on the page right now. The old "individual" plan bills
+   the old Founder amount on the Railway/Stripe side, so a $199 Care button
+   must NOT be pointed at it. Once the Stripe price for Care is $199/month,
+   change the Care link to class="pcc buyBtn" with its real data-plan. ── */
 (function () {
   var CHECKOUT_API = 'https://sabr-checkout-production.up.railway.app';
   var interval = 'month';
   /* ════════════════════════════════════════════════════════════════
      SITE_CONFIG  --  PLACEHOLDER: pricing under revision
-     The ONE place to set final prices, SI version and release link.
-     Values below are today's live values, unchanged. The static HTML
+     The ONE place to set tier prices, SI version and release link.
+     The three-tier model (Free / Care / Done-for-you) is Leon's
+     RECOMMENDATION, not tested market data.
+     Elements with data-cfg="a.b.c" are filled from here. The static HTML
      keeps the same text as the no-JS fallback; keep both in step.
      TODO: SI_VERSION is hand-set from the GitHub latest-release tag
      (v2026.10.29.1, checked 2026-11-02). It is not read automatically
      (CSP blocks the GitHub API). Update it on each SI release.
      ════════════════════════════════════════════════════════════════ */
   var SITE_CONFIG = {
-    founder:   { month: '$7,499', year: '$74,990' },   /* PLACEHOLDER: pricing under revision */
-    perpetual: '$46,500',                                /* PLACEHOLDER: pricing under revision */
+    tiers: {
+      free:  { price: '$0',     per: ' / build it yourself' },  /* PLACEHOLDER: pricing under revision */
+      care:  { price: '$199',   per: ' / month' },              /* PLACEHOLDER: pricing under revision */
+      setup: { price: '$1,500', per: ' one-time setup' }        /* PLACEHOLDER: pricing under revision */
+    },
     SI_VERSION: 'v2026.10.29.1',
     RELEASES_URL: 'https://github.com/sabrtechnologies/sabr-installers/releases/latest'
   };
-  var PRICES = {
-    month: { i: [SITE_CONFIG.founder.month, ' / month'] },
-    year:  { i: [SITE_CONFIG.founder.year, ' / year'] }
-  };
+  function cfg(path) {
+    return path.split('.').reduce(function (o, k) { return o && o[k]; }, SITE_CONFIG);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-cfg]'), function (e) {
+    var v = cfg(e.getAttribute('data-cfg'));
+    if (typeof v === 'string') e.textContent = v;
+  });
   Array.prototype.forEach.call(document.querySelectorAll('[data-si-version]'), function (e) { e.textContent = SITE_CONFIG.SI_VERSION; });
   Array.prototype.forEach.call(document.querySelectorAll('[data-release-link]'), function (e) { e.href = SITE_CONFIG.RELEASES_URL; });
-  var pa = document.getElementById('pAmt'); if (pa) pa.textContent = SITE_CONFIG.perpetual;
-  function paint() {
-    var p = PRICES[interval];
-    var m = { iAmt: p.i[0], iPer: p.i[1] };
-    for (var k in m) { var e = document.getElementById(k); if (e) e.textContent = m[k]; }
-    var bm = document.getElementById('bMonth'), by = document.getElementById('bYear');
-    if (bm) bm.className = interval === 'month' ? 'on' : '';
-    if (by) by.className = interval === 'year' ? 'on' : '';
-  }
-  var bm = document.getElementById('bMonth'), by = document.getElementById('bYear');
-  if (bm) bm.addEventListener('click', function () { interval = 'month'; paint(); });
-  if (by) by.addEventListener('click', function () { interval = 'year'; paint(); });
-  paint();
 
   Array.prototype.forEach.call(document.querySelectorAll('.buyBtn'), function (btn) {
     var msg = btn.parentNode.querySelector('.buyMsg');
