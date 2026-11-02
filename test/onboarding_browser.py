@@ -93,16 +93,21 @@ with sync_playwright() as p:
             else:
                 page.goto(BASE + '/', wait_until='load')
             # Exercise existing payment UI only against explicit failure fixtures.
-            page.locator('#bYear').click()
-            check(f'{width} unchanged annual price', page.locator('#iAmt').inner_text() == '$74,990')
-            page.locator('.buyBtn[data-plan="individual"]').click()
-            page.wait_for_function("document.querySelector('.buyBtn[data-plan=individual]').parentNode.querySelector('.buyMsg').textContent.includes('Offline fixture')")
-            check(f'{width} annual checkout payload', requests[-1]['body'] == {'plan': 'individual', 'interval': 'year'})
-            page.locator('#bMonth').click()
-            check(f'{width} unchanged monthly price', page.locator('#iAmt').inner_text() == '$7,499')
-            page.locator('.buyBtn[data-plan="perpetual"]').click()
-            page.wait_for_function("document.querySelector('.buyBtn[data-plan=perpetual]').parentNode.querySelector('.buyMsg').textContent.includes('Offline fixture')")
-            check(f'{width} perpetual payload', requests[-1]['body'] == {'plan': 'perpetual', 'interval': 'month'})
+            # Three-tier pricing (Free / Care / Done-for-you). Care and Done-for-you are
+            # contact-based until the Care Stripe price exists, so no .buyBtn is on the page.
+            tiers = page.locator('#pricing .tiers .plan')
+            check(f'{width} three tiers', tiers.count() == 3)
+            # inner_text applies the CSS uppercase transform, so compare case-insensitively
+            names = [t.strip().lower() for t in page.locator('#pricing .tiers .pn').all_inner_texts()]
+            check(f'{width} tier names', names == ['free', 'care', 'done-for-you'])
+            amts = [t.strip() for t in page.locator('#pricing .tiers .amt').all_inner_texts()]
+            check(f'{width} tier prices', amts[:3] == ['$0', '$199', '$1,500'])
+            check(f'{width} no hardware resale', 'does not sell or resell hardware' in page.locator('#pricing').inner_text())
+            check(f'{width} no checkout button until Stripe price is set', page.locator('.buyBtn').count() == 0)
+            check(f'{width} pricing no horizontal overflow', page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
+            page.locator('.contactCta[data-contact="careBox"]').click()
+            check(f'{width} care contact reveals', page.locator('#careBox').is_visible())
+            page.locator('#pricing').screenshot(path=str(OUT / f'pricing-{width}.png'))
             page.locator('#tName').fill('Offline Fixture')
             page.locator('#tEmail').fill('fixture@example.invalid')
             page.locator('#tPhone').fill('0000000000')
