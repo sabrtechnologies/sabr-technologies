@@ -989,7 +989,7 @@ footer{
         <li>Your install token, issued and kept working</li>
         <li>Installer downloads for macOS, Windows and Linux</li>
       </ul>
-      <a href="#" class="pcc contactCta" data-contact="careBox">Get Care</a>
+      <a href="#careBox" class="pcc contactCta" data-contact="careBox" aria-controls="careBox" aria-expanded="false">Get Care</a>
       <div class="buyMsg"></div>
       <div class="contact-box" id="careBox" hidden>
         <div class="k">Reach Dean directly</div>
@@ -1009,7 +1009,7 @@ footer{
         <li>Then Care monthly: updates, support, install token</li>
         <li>Hardware is yours to buy; Sabr does not sell or resell it</li>
       </ul>
-      <a href="#" class="pcc contactCta" data-contact="doneBox">Ask for setup</a>
+      <a href="#doneBox" class="pcc contactCta" data-contact="doneBox" aria-controls="doneBox" aria-expanded="false">Ask for setup</a>
       <div class="buyMsg"></div>
       <div class="contact-box" id="doneBox" hidden>
         <div class="k">Reach Dean directly</div>
@@ -1019,7 +1019,7 @@ footer{
       </div>
     </div>
   </div>
-  <p class="team-line">Running this for a company or team? <a href="#" class="link-acc contactCta" data-contact="teamBox">Talk to us</a> about a custom deployment.</p>
+  <p class="team-line">Running this for a company or team? <a href="#teamBox" class="link-acc contactCta" data-contact="teamBox" aria-controls="teamBox" aria-expanded="false">Talk to us</a> about a custom deployment.</p>
   <div class="contact-box" id="teamBox" hidden>
     <div class="k">Reach Dean directly</div>
     <div class="contact-mail">deansabrwork@gmail.com</div>
@@ -1245,7 +1245,9 @@ window.addEventListener('message', function(e){
   Array.prototype.forEach.call(document.querySelectorAll('.contact-copy'), function (cp) {
     cp.addEventListener('click', function (e) {
       e.preventDefault();
-      if (window.SabrUI && window.SabrUI.copy) window.SabrUI.copy(EMAIL, cp);
+      if (window.SabrUI && window.SabrUI.copy) {
+        return window.SabrUI.copy(EMAIL, cp, 'Copy unavailable — select the address and copy it');
+      }
     });
   });
 })();

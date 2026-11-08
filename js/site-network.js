@@ -20,13 +20,13 @@
       return url.href;
     } catch (_) { return null; }
   }
-  async function copy(text, button) {
+  async function copy(text, button, fallback) {
     try {
       if (!navigator.clipboard) throw new Error('Clipboard unavailable');
       await navigator.clipboard.writeText(text);
       button.textContent = 'Copied';
     } catch (_) {
-      button.textContent = 'Copy unavailable — select the key or command and copy it';
+      button.textContent = fallback || 'Copy unavailable — select the key or command and copy it';
     }
   }
   window.SabrUI = {json: json, safeURL: safeURL, copy: copy};
