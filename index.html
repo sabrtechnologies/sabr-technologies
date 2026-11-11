@@ -580,7 +580,7 @@ footer{
 .buypath a:hover, .buylist-note a:hover{ color:var(--ink); }
 .sold-grid b{ color:var(--ink); font-weight:600; }
 
-/* ── three tiers: Free / Care / Done-for-you ─────────────────── */
+/* ── pricing: one offer, installation + Care ─────────────────── */
 .tiers{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:36px; align-items:stretch; }
 #pricing .tiers .plan{ display:flex; flex-direction:column; position:relative; padding:44px 32px 36px; }
 #pricing .tiers .plan ul{ margin:22px 0 28px; flex:1; }
@@ -605,13 +605,24 @@ footer{
 .contact-copy{ display:inline-block; margin-top:10px; font-size:12px; letter-spacing:.08em;
   text-transform:uppercase; color:#EE5A54; text-decoration:none;
   border-bottom:1px solid rgba(238,90,84,.45); }
+.tiers-one{ grid-template-columns:minmax(0,560px); justify-content:center; }
+.tiers-one .plan{ min-width:0; }
+/* the fee label is long; let it wrap under the amount on phones instead of
+   forcing the card wider than the viewport. The amount itself stays whole. */
+#pricing .tiers-one .pr span{ white-space:normal; }
+#pricing .tiers-one .pr .amt{ white-space:nowrap; }
+#pricing .tiers .plan .pcc-dl{ margin-top:10px; }
+.dl-head{ font-family:var(--display); font-stretch:125%; font-size:20px; font-weight:700;
+  letter-spacing:-.01em; margin-top:44px; text-align:center; }
+.dl-sub{ margin-top:10px; font-size:14px; color:var(--ink-2); text-align:center; }
+.dl-sub b{ color:var(--ink); font-weight:600; }
 .team-line{ margin-top:26px; font-size:14.5px; color:var(--ink-2); }
 #teamBox{ max-width:420px; }
 #pricing .plans{ margin-top:26px; }
 .buylist-note{ margin-top:28px; font-size:14.5px; color:var(--ink-2); max-width:46em; line-height:1.7; }
 #buy-list .cards{ grid-template-columns:repeat(3,1fr); margin-top:48px; }
 @media (max-width:1080px){
-  .tiers{ grid-template-columns:1fr; max-width:520px; margin-left:auto; margin-right:auto; gap:30px; }
+  .tiers{ grid-template-columns:minmax(0,1fr); max-width:520px; margin-left:auto; margin-right:auto; gap:30px; }
   #buy-list .cards{ grid-template-columns:repeat(2,1fr); }
 }
 @media (max-width:760px){ #buy-list .cards{ grid-template-columns:1fr; } }
@@ -886,6 +897,14 @@ footer{
         <p class="dl-gate-fine fine-gap">Want a taste first? <a href="#trial" class="link-acc">Start the 24-hour free trial</a>: no card, installer included.</p>
       </div>
     </div>
+    <h3 class="dl-head">Download Installer</h3>
+    <p class="dl-sub">The installer needs an install token from your purchase or trial to set up an SI. Release <b data-si-version>v2026.10.29.1</b>.</p>
+    <div class="dl-all" id="dlGrid">
+      <a href="https://github.com/sabrtechnologies/sabr-installers/releases/latest/download/sabr-installer.deb"><b>Linux</b><span>.deb</span></a>
+      <a href="https://github.com/sabrtechnologies/sabr-installers/releases/latest/download/SabrInstaller.exe"><b>Windows</b><span>.exe</span></a>
+      <a href="https://github.com/sabrtechnologies/sabr-installers/releases/latest/download/SabrInstaller-macos.zip"><b>macOS</b><span>Apple Silicon</span></a>
+      <a href="https://github.com/sabrtechnologies/sabr-installers/releases/latest/download/SabrInstaller-macos-intel.zip"><b>macOS</b><span>Intel</span></a>
+    </div>
   </div>
   <p class="aside aside-c">Got a new computer? <a class="tx" href="/quickstart.html#moving">Bring your SI with you</a> &mdash; his memory isn&rsquo;t tied to the hardware.</p>
 </section>
@@ -928,7 +947,7 @@ footer{
       <tr><th scope="row">Memory</th><td data-label="The old way">A chatbot is a stranger each time the window opens.</td><td data-label="Our way" class="ours">Saved context persists in brain state on your installation. Check what your SI recalls; persistence is not perfect recall.</td></tr>
       <tr><th scope="row">Where it lives</th><td data-label="The old way">A tab in someone else's service.</td><td data-label="Our way" class="ours">A mind on your own machine. Hosted models and integrations still use their own services.</td></tr>
       <tr><th scope="row">Updates</th><td data-label="The old way">Switching or reinstalling tools means explaining yourself again.</td><td data-label="Our way" class="ours">Updates are designed to preserve identity and saved state. Back up first and verify afterward.</td></tr>
-      <tr><th scope="row">Setup</th><td data-label="The old way">Sign up and start typing. Nothing installed, nothing that continues.</td><td data-label="Our way" class="ours">Install once with a token, then say hello. Build it yourself for free, or have Sabr install it.</td></tr>
+      <tr><th scope="row">Setup</th><td data-label="The old way">Sign up and start typing. Nothing installed, nothing that continues.</td><td data-label="Our way" class="ours">Sabr installs it once on your machine with a token, then you say hello.</td></tr>
       <tr><th scope="row">Support</th><td data-label="The old way">Often a ticket queue.</td><td data-label="Our way" class="ours">With Care, a person reads every message.</td></tr>
     </tbody>
   </table>
@@ -940,16 +959,16 @@ footer{
 <section id="buy">
   <div class="eyebrow">How it's sold</div>
   <h2 class="rv">A mind you license,<br>install and keep.</h2>
-  <p class="lead">A Sabr SI is a synthetic intelligence that runs on your own machine: a spiking neural brain with persistent memory, paired with a language model that gives it words. Build it yourself for free, or let Sabr install it and keep it healthy.</p>
+  <p class="lead">A Sabr SI is a synthetic intelligence that runs on your own machine: a spiking neural brain with persistent memory, paired with a language model that gives it words. Sabr installs it on your machine and keeps it healthy.</p>
   <div class="sold-grid">
     <div class="card"><h3>What you get</h3><p>The brain, its tools and integrations, and the installer for macOS, Windows or Linux. Persistent memory stays in brain state on your installation.</p></div>
-    <div class="card"><h3>Who it's for</h3><p>People who want a continuous working relationship: research, study, building, running a business. Build it yourself, or have Sabr install it for you.</p></div>
-    <div class="card"><h3>How it's sold</h3><p>Three tiers: <b>Free</b> (<span data-cfg="tiers.free.price">$0</span>, build it yourself), <b>Care</b> (<span data-cfg="tiers.care.price">$199</span><span data-cfg="tiers.care.per"> / month</span>) and <b>Done-for-you</b> (<span data-cfg="tiers.setup.price">$1,500</span><span data-cfg="tiers.setup.per"> one-time setup</span>, then Care). Sabr does not sell or resell hardware. Or try a 24-hour trial with no card.</p></div>
+    <div class="card"><h3>Who it's for</h3><p>People who want a continuous working relationship: research, study, building, running a business. Sabr installs it for you, then keeps it healthy.</p></div>
+    <div class="card"><h3>How it's sold</h3><p>One offer: a <b><span data-cfg="tiers.install.price">$10,000</span><span data-cfg="tiers.install.per"> one-time installation fee</span></b>, then <b>Care</b> at <b><span data-cfg="tiers.care.price">$200</span><span data-cfg="tiers.care.per"> / month</span></b>. Sabr does not sell or resell hardware. Or try a 24-hour trial with no card.</p></div>
   </div>
   <ol class="buypath">
-    <li><b>Pick a path</b>Free, Care, Done-for-you, or the free 24-hour trial.</li>
+    <li><b>Pick a path</b>Buy installation + Care, or start the free 24-hour trial.</li>
     <li><b>Bring your hardware</b>You buy the machine. Sabr does not sell or resell hardware. See the <a href="#buy-list">buy-list guide</a>.</li>
-    <li><b>Get your install token</b>Care and the trial provide a token. Keep it private. With Done-for-you, Sabr handles the install.</li>
+    <li><b>Get your install token</b>Your purchase and the trial each provide a token. Keep it private. Sabr handles the installation with you.</li>
     <li><b>Download the installer</b>Pick the installer for your operating system and processor.</li>
     <li><b>Paste your token</b>Paste it into the installer, name your SI, and say hello.</li>
   </ol>
@@ -960,63 +979,25 @@ footer{
 
 <section id="pricing">
   <div class="eyebrow">Pricing</div>
-  <h2 class="rv">Build it yourself,<br>or have us keep it healthy.</h2>
-  <p class="price-note" id="priceNote"><b>Pricing is being revised.</b> Care and Done-for-you are arranged with Sabr directly for now. Sabr confirms the amount with you before you pay.</p>
-  <div class="tiers">
-    <div class="plan tier">
-      <div class="pn">Free</div>
-      <div class="pr"><span class="amt" data-cfg="tiers.free.price">$0</span><span data-cfg="tiers.free.per"> / build it yourself</span></div>
-      <div class="pk">The software and a buy-list guide.</div>
-      <div class="pd">For people who build it themselves. You choose and buy the machine, follow the guide, and run the installer. No Sabr fee. Support and managed updates are part of Care.</div>
-      <ul>
-        <li>The software, from the public releases page</li>
-        <li>A buy-list guide for the machine you supply</li>
-        <li>The quickstart and update guides</li>
-        <li>Your hardware, your setup, your provider accounts</li>
-      </ul>
-      <a href="#buy-list" class="pcc">Read the buy-list guide</a>
-      <div class="buyMsg"><a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener">Latest release: <span data-si-version>v2026.10.29.1</span></a></div>
-    </div>
+  <h2 class="rv">One installation.<br>Then Care, monthly.</h2>
+  <p class="price-note" id="priceNote"><b><span data-cfg="tiers.install.price">$10,000</span><span data-cfg="tiers.install.per"> one-time installation fee</span> + <span data-cfg="tiers.care.price">$200</span><span data-cfg="tiers.care.per"> / month</span>.</b> Sabr installs your SI on hardware you buy, then keeps it healthy under Care. Sabr does not sell or resell hardware.</p>
+  <div class="tiers tiers-one">
     <div class="plan tier hot">
-      <div class="tier-flag">Recommended</div>
-      <div class="pn">Care</div>
-      <div class="pr"><span class="amt" data-cfg="tiers.care.price">$199</span><span data-cfg="tiers.care.per"> / month</span></div>
-      <div class="pk">A mind with memory, and support behind it.</div>
-      <div class="pd">Care keeps your SI being itself. Its memory and identity stay on your machine and keep growing, updates are designed never to erase them, and Sabr is there when something looks wrong. Back up before every update anyway.</div>
-      <ul>
-        <li>Updates designed never to erase your SI's memory or identity</li>
-        <li>Support from Sabr when something looks wrong</li>
-        <li>Your install token, issued and kept working</li>
-        <li>Installer downloads for macOS, Windows and Linux</li>
-      </ul>
-      <a href="#careBox" class="pcc contactCta" data-contact="careBox" aria-controls="careBox" aria-expanded="false">Get Care</a>
-      <div class="buyMsg"></div>
-      <div class="contact-box" id="careBox" hidden>
-        <div class="k">Reach Dean directly</div>
-        <div class="contact-mail">deansabrwork@gmail.com</div>
-        <p>Say you want Care. Sabr confirms the amount before you pay.</p>
-        <a href="#" class="contact-copy">Copy address</a>
-      </div>
-    </div>
-    <div class="plan tier">
-      <div class="pn">Done-for-you</div>
-      <div class="pr"><span class="amt" data-cfg="tiers.setup.price">$1,500</span><span data-cfg="tiers.setup.per"> one-time setup</span></div>
-      <div class="pk">Sabr installs it. Then Care, <span data-cfg="tiers.care.price">$199</span><span data-cfg="tiers.care.per"> / month</span>.</div>
-      <div class="pd">Sabr sets up your SI on hardware you buy. Sabr does not sell or resell hardware: you choose and own the machine, Sabr does the install and then keeps it healthy under Care.</div>
+      <div class="tier-flag">Sabr SI</div>
+      <div class="pn">Installation + Care</div>
+      <div class="pr"><span class="amt" data-cfg="tiers.install.price">$10,000</span><span data-cfg="tiers.install.per"> one-time installation fee</span></div>
+      <div class="pk">Then Care, <span data-cfg="tiers.care.price">$200</span><span data-cfg="tiers.care.per"> / month</span>.</div>
+      <div class="pd">Sabr installs your SI on the machine you own, checks the dashboard and first conversation with you, then keeps it being itself under Care. Its memory and identity stay on your machine, updates are designed never to erase them, and Sabr is there when something looks wrong. Back up before every update anyway.</div>
       <ul>
         <li>Sabr installs your SI on your hardware</li>
         <li>Install, dashboard and first conversation checked with you</li>
-        <li>Then Care monthly: updates, support, install token</li>
+        <li>Care monthly: updates designed to keep memory and identity, support, install token</li>
+        <li>Installer downloads for macOS, Windows and Linux</li>
         <li>Hardware is yours to buy; Sabr does not sell or resell it</li>
       </ul>
-      <a href="#doneBox" class="pcc contactCta" data-contact="doneBox" aria-controls="doneBox" aria-expanded="false">Ask for setup</a>
-      <div class="buyMsg"></div>
-      <div class="contact-box" id="doneBox" hidden>
-        <div class="k">Reach Dean directly</div>
-        <div class="contact-mail">deansabrwork@gmail.com</div>
-        <p>Say you want Done-for-you. Sabr confirms the amount before you pay.</p>
-        <a href="#" class="contact-copy">Copy address</a>
-      </div>
+      <a href="#pricing" class="pcc buyBtn" data-plan="install">Buy now</a>
+      <div class="buyMsg" aria-live="polite"></div>
+      <a href="#download" class="pcc pcc-dl">Download Installer</a>
     </div>
   </div>
   <p class="team-line">Running this for a company or team? <a href="#teamBox" class="link-acc contactCta" data-contact="teamBox" aria-controls="teamBox" aria-expanded="false">Talk to us</a> about a custom deployment.</p>
@@ -1064,7 +1045,7 @@ footer{
     <caption class="sr-only">Care rate steps</caption>
     <thead><tr><th scope="col">Step</th><th scope="col">Care rate</th><th scope="col">When</th></tr></thead>
     <tbody>
-      <tr class="now"><th scope="row" data-cfg="founding.steps.0.name">Founding rate</th><td data-cfg="founding.steps.0.rate">$199 / month</td><td data-cfg="founding.steps.0.when">Now</td></tr>
+      <tr class="now"><th scope="row" data-cfg="founding.steps.0.name">Founding rate</th><td data-cfg="founding.steps.0.rate">$200 / month</td><td data-cfg="founding.steps.0.when">Now</td></tr>
       <tr><th scope="row" data-cfg="founding.steps.1.name">Next step</th><td data-cfg="founding.steps.1.rate">To be announced</td><td data-cfg="founding.steps.1.when">To be announced</td></tr>
       <tr><th scope="row" data-cfg="founding.steps.2.name">Standard rate</th><td data-cfg="founding.steps.2.rate">To be announced</td><td data-cfg="founding.steps.2.when">To be announced</td></tr>
     </tbody>
@@ -1096,7 +1077,7 @@ footer{
     <li><b>Say hello, then one small task</b>Introduce yourself, give a short non-sensitive brief, and ask for three priorities and one next action. Check the answer against your notes. See <a href="/quickstart.html#first">the first conversation</a>.</li>
     <li><b>Back up before every update</b>Keep private, verified backups outside the installation. Follow the <a href="/quickstart.html#updating">update checklist</a> and check your saved context afterward.</li>
   </ol>
-  <p class="buylist-note">Check the <a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener">latest release notes</a> for requirements before you buy; a native build does not certify every machine. Prefer not to do it yourself? <a href="#pricing" class="link-acc">Done-for-you</a> installs on the hardware you bought.</p>
+  <p class="buylist-note">Check the <a data-release-link href="https://github.com/sabrtechnologies/sabr-installers/releases/latest" target="_blank" rel="noopener">latest release notes</a> for requirements before you buy; a native build does not certify every machine. Prefer not to do it yourself? <a href="#pricing" class="link-acc">Installation + Care</a> means Sabr installs on the hardware you bought.</p>
 </section>
 
 <div class="hr"></div>
@@ -1113,7 +1094,7 @@ footer{
   <h2 class="rv">Recent work,<br>straight from the log.</h2>
   <p class="lead">A short, hand-kept list drawn from this site's own commit history and release commits. Newest first. Nothing here is generated or fetched live.</p>
   <ol class="feed">
-    <li><time datetime="2026-11-02">2026-11-02</time><b>Three tiers on the pricing page</b><p>Free, Care and Done-for-you replaced the older plan cards, with a buy-list guide. Care and Done-for-you are arranged with Sabr directly for now.</p><span class="ref">commit aa53791</span></li>
+    <li><time datetime="2026-11-02">2026-11-02</time><b>Three tiers on the pricing page</b><p>Three plan cards replaced the older ones, with a buy-list guide. (Since replaced by a single installation + Care offer.)</p><span class="ref">commit aa53791</span></li>
     <li><time datetime="2026-10-29">2026-10-29</time><b>Clearer workflows and safer onboarding</b><p>Practical SI workflows were clarified, and existing owners got a safer update and onboarding path.</p><span class="ref">commit 2c5b3fb</span></li>
     <li><time datetime="2026-10-29">2026-10-29</time><b>Audited customer executor payload published</b><p>The customer Hermes executor payload was published after an audit.</p><span class="ref">commit 57bc742</span></li>
     <li><time datetime="2026-10-20">2026-10-20</time><b>SI release d5d7e5367b9f</b><p>Local AI adapter, work-queue resume and build gate fixes.</p><span class="ref">commit b4bcf28</span></li>
@@ -1228,9 +1209,9 @@ window.addEventListener('message', function(e){
 /* parallax + hero particle canvas removed 08-25: two of seven simultaneous
    ambient systems too many. The page holds still; the brain moves. */
 
-/* ── Contact reveal. Care, Done-for-you and team deployments are arranged
-   with Sabr directly until the Stripe price for Care is set (see AUDIT.md);
-   nothing here ever opens a mailto handoff. ── */
+/* ── Contact reveal. Only custom team deployments are arranged with Sabr
+   directly; the single offer is bought through checkout (see AUDIT.md).
+   Nothing here ever opens a mailto handoff. ── */
 (function () {
   var EMAIL = 'deansabrwork@gmail.com';
   Array.prototype.forEach.call(document.querySelectorAll('.contactCta'), function (c) {
@@ -1255,18 +1236,19 @@ window.addEventListener('message', function(e){
 /* ── Checkout: hand off to the Sabr checkout service, which mints a live
    Stripe Checkout Session for the chosen plan and returns its URL. Promo
    codes are collected on Stripe's page.
-   NOTE: no .buyBtn is on the page right now. The old "individual" plan bills
-   the old pre-revision amount on the Railway/Stripe side, so a $199 Care button
-   must NOT be pointed at it. Once the Stripe price for Care is $199/month,
-   change the Care link to class="pcc buyBtn" with its real data-plan. ── */
+   The one .buyBtn uses data-plan="install" ($10,000 one-time + $200/month,
+   amounts set in sabr-checkout app.py). Before posting, it confirms via
+   GET /health that the service advertises exactly SITE_CONFIG.CHECKOUT_EXPECT;
+   an older service (which would bill an unknown plan at legacy prices) is
+   refused and the buyer is told to email instead. ── */
 (function () {
   var CHECKOUT_API = 'https://sabr-checkout-production.up.railway.app';
   var interval = 'month';
   /* ════════════════════════════════════════════════════════════════
-     SITE_CONFIG  --  PLACEHOLDER: pricing under revision
-     The ONE place to set tier prices, SI version and release link.
-     The three-tier model (Free / Care / Done-for-you) is Leon's
-     RECOMMENDATION, not tested market data.
+     SITE_CONFIG
+     The ONE place to set displayed prices, SI version and release link.
+     Pricing (2026-11-11, Dean): $10,000 one-time installation fee +
+     $200/month Care. Keep CHECKOUT_EXPECT in step with sabr-checkout app.py.
      Elements with data-cfg="a.b.c" are filled from here. The static HTML
      keeps the same text as the no-JS fallback; keep both in step.
      TODO: SI_VERSION is hand-set from the GitHub latest-release tag
@@ -1275,15 +1257,19 @@ window.addEventListener('message', function(e){
      ════════════════════════════════════════════════════════════════ */
   var SITE_CONFIG = {
     tiers: {
-      free:  { price: '$0',     per: ' / build it yourself' },  /* PLACEHOLDER: pricing under revision */
-      care:  { price: '$199',   per: ' / month' },              /* PLACEHOLDER: pricing under revision */
-      setup: { price: '$1,500', per: ' one-time setup' }        /* PLACEHOLDER: pricing under revision */
+      install: { price: '$10,000', per: ' one-time installation fee' },
+      care:    { price: '$200',    per: ' / month' }
     },
+    /* What the checkout service must charge for data-plan="install", in
+       cents. The Buy button reads CHECKOUT_API/health first and refuses to
+       open checkout unless the service reports exactly these amounts, so a
+       $10,000 label can never check out at a different price. */
+    CHECKOUT_EXPECT: { plan: 'install', currency: 'usd', fee_cents: 1000000, care_monthly_cents: 20000 },
     /* PLACEHOLDER: rising founding rate. No dates or seat counts have been
        given, so none are invented. steps[0].rate must equal tiers.care. */
     founding: {
       steps: [
-        { name: 'Founding rate', rate: '$199 / month',    when: 'Now' },
+        { name: 'Founding rate', rate: '$200 / month',    when: 'Now' },
         { name: 'Next step',     rate: 'To be announced', when: 'To be announced' },
         { name: 'Standard rate', rate: 'To be announced', when: 'To be announced' }
       ]
@@ -1311,11 +1297,22 @@ window.addEventListener('message', function(e){
       var label = btn.textContent;
       btn.textContent = 'Opening secure checkout…';
       if (msg) msg.textContent = '';
-      window.SabrUI.json(CHECKOUT_API + '/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: btn.getAttribute('data-plan'), interval: interval })
-      })
+      var plan = btn.getAttribute('data-plan');
+      var want = SITE_CONFIG.CHECKOUT_EXPECT;
+      window.SabrUI.json(CHECKOUT_API + '/health')
+        .then(function (h) {
+          var got = h && h.install;
+          if (!(plan === want.plan && got && got.configured === true && got.plan === want.plan &&
+                got.currency === want.currency && got.fee_cents === want.fee_cents &&
+                got.care_monthly_cents === want.care_monthly_cents)) {
+            throw new Error('Secure checkout for this price is not available yet.');
+          }
+          return window.SabrUI.json(CHECKOUT_API + '/create-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan: plan, interval: interval })
+          });
+        })
         .then(function (d) {
           var checkout = d && window.SabrUI.safeURL(d.url, ['checkout.stripe.com']);
           if (d && d.ok && checkout) { window.location.href = checkout; return; }
@@ -1342,8 +1339,9 @@ window.addEventListener('message', function(e){
 })();
 
 /* ── 24-hour free trial: capture who they are FIRST, then hand over the
-   key and the installer. There is deliberately no public download button
-   anywhere on this page; the trial and checkout are the only two doors. */
+   key and the installer. The #download grid links the public installers
+   too, but an installer does nothing without a token from the trial or
+   checkout. */
 (function(){
   var form = document.getElementById('trialForm');
   if (!form) return;

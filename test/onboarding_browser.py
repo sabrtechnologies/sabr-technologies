@@ -93,32 +93,34 @@ with sync_playwright() as p:
             else:
                 page.goto(BASE + '/', wait_until='load')
             # Exercise existing payment UI only against explicit failure fixtures.
-            # Three-tier pricing (Free / Care / Done-for-you). Care and Done-for-you are
-            # contact-based until the Care Stripe price exists, so no .buyBtn is on the page.
+            # One offer: $10,000 one-time installation fee + $200/month Care, bought
+            # through the sabr-checkout `install` plan. The offline /health fixture
+            # does not advertise those amounts, so the button must refuse to POST.
             tiers = page.locator('#pricing .tiers .plan')
-            check(f'{width} three tiers', tiers.count() == 3)
-            # inner_text applies the CSS uppercase transform, so compare case-insensitively
-            names = [t.strip().lower() for t in page.locator('#pricing .tiers .pn').all_inner_texts()]
-            check(f'{width} tier names', names == ['free', 'care', 'done-for-you'])
+            check(f'{width} one offer card', tiers.count() == 1)
             amts = [t.strip() for t in page.locator('#pricing .tiers .amt').all_inner_texts()]
-            check(f'{width} tier prices', amts[:3] == ['$0', '$199', '$1,500'])
-            check(f'{width} no hardware resale', 'does not sell or resell hardware' in page.locator('#pricing').inner_text())
-            check(f'{width} no checkout button until Stripe price is set', page.locator('.buyBtn').count() == 0)
+            check(f'{width} installation fee', amts == ['$10,000'])
+            pricing_text = page.locator('#pricing').inner_text()
+            check(f'{width} care monthly', '$200' in pricing_text)
+            check(f'{width} no old prices', '$199' not in page.content() and '$1,500' not in page.content())
+            check(f'{width} no hardware resale', 'does not sell or resell hardware' in pricing_text)
+            check(f'{width} one buy button on install plan', page.locator('.buyBtn[data-plan="install"]').count() == 1)
+            check(f'{width} download installer visible', page.get_by_role('link', name='Download Installer').first.is_visible())
             check(f'{width} pricing no horizontal overflow', page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
             for sid in ('compare', 'founding-rate', 'buy-list', 'learned'):
                 check(f'{width} section #{sid} present', page.locator('#' + sid).count() == 1)
-            check(f'{width} founding rate matches Care price', page.locator('#founding-rate [data-cfg="founding.steps.0.rate"]').inner_text().startswith('$199'))
+            check(f'{width} founding rate matches Care price', page.locator('#founding-rate [data-cfg="founding.steps.0.rate"]').inner_text().startswith('$200'))
             check(f'{width} starter guide has six steps', page.locator('#starter-guide li').count() == 6)
             check(f'{width} learned feed has dated entries', page.locator('#learned .feed time').count() >= 1)
             check(f'{width} new sections no horizontal overflow', page.evaluate('document.documentElement.scrollWidth <= innerWidth'))
-            for contact_id in ('careBox', 'doneBox', 'teamBox'):
-                control = page.locator(f'.contactCta[data-contact="{contact_id}"]')
-                check(f'{width} {contact_id} control target', control.get_attribute('aria-controls') == contact_id)
-                check(f'{width} {contact_id} initially collapsed', control.get_attribute('aria-expanded') == 'false')
-                check(f'{width} {contact_id} panel initially hidden', page.locator('#' + contact_id).is_hidden())
-            page.locator('.contactCta[data-contact="careBox"]').click()
-            check(f'{width} care contact reveals', page.locator('#careBox').is_visible())
-            check(f'{width} care expanded state', page.locator('.contactCta[data-contact="careBox"]').get_attribute('aria-expanded') == 'true')
+            before = len([r for r in requests if r['url'] == CHECKOUT + '/create-checkout'])
+            page.locator('.buyBtn[data-plan="install"]').click()
+            page.wait_for_function("document.querySelector('#pricing .buyMsg').textContent.length > 0")
+            check(f'{width} buy refuses when checkout amounts unconfirmed',
+                  len([r for r in requests if r['url'] == CHECKOUT + '/create-checkout']) == before)
+            control = page.locator('.contactCta[data-contact="teamBox"]')
+            check(f'{width} teamBox control target', control.get_attribute('aria-controls') == 'teamBox')
+            check(f'{width} teamBox initially collapsed', control.get_attribute('aria-expanded') == 'false')
             page.locator('#pricing').screenshot(path=str(OUT / f'pricing-{width}.png'))
             page.locator('#tName').fill('Offline Fixture')
             page.locator('#tEmail').fill('fixture@example.invalid')

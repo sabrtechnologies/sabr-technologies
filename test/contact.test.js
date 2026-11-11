@@ -51,9 +51,12 @@ function click(node) {
   return completion;
 }
 
-test('every contact control declares its target and collapsed state before revealing existing panels', () => {
+// Pricing is now a single Buy (checkout) path. The only remaining contact
+// reveal is the team / custom-deployment line; the Gmail-only Care and
+// Done-for-you boxes are gone.
+test('the only contact control is the team line, and it declares its target and collapsed state', () => {
   const app = browser();
-  assert.deepEqual(app.controls.map(control => control.getAttribute('data-contact')), ['careBox', 'doneBox', 'teamBox']);
+  assert.deepEqual(app.controls.map(control => control.getAttribute('data-contact')), ['teamBox']);
   for (const control of app.controls) {
     const id = control.getAttribute('data-contact');
     assert.equal(control.getAttribute('href'), '#' + id);
@@ -65,9 +68,10 @@ test('every contact control declares its target and collapsed state before revea
     assert.equal(control.getAttribute('aria-expanded'), 'true');
   }
   assert.deepEqual(app.writes, []);
+  assert.doesNotMatch(html, /id="careBox"|id="doneBox"/);
 });
 
-test('address copy confirmation waits for clipboard completion on every panel', async () => {
+test('address copy confirmation waits for clipboard completion', async () => {
   const pending = [];
   const app = browser(() => new Promise(resolve => { pending.push(resolve); }));
   for (const copy of app.copies) {
@@ -78,7 +82,7 @@ test('address copy confirmation waits for clipboard completion on every panel', 
     await completion;
     assert.equal(copy.textContent, 'Copied');
   }
-  assert.deepEqual(app.writes, [address, address, address]);
+  assert.deepEqual(app.writes, [address]);
 });
 
 test('rejected clipboard writes preserve the address and give address-specific manual guidance', async () => {
@@ -92,9 +96,9 @@ test('rejected clipboard writes preserve the address and give address-specific m
     await completion;
     assert.equal(copy.textContent, manualCopy);
   }
-  assert.deepEqual(app.writes, [address, address, address]);
+  assert.deepEqual(app.writes, [address]);
   for (const panel of Object.values(app.panels)) assert.ok(panel.textContent.includes('Reach Dean directly'));
-  assert.equal((html.match(/<div class="contact-mail">deansabrwork@gmail\.com<\/div>/g) || []).length, 3);
+  assert.equal((html.match(/<div class="contact-mail">deansabrwork@gmail\.com<\/div>/g) || []).length, 1);
 });
 
 test('unavailable clipboard gives address-specific guidance without claiming success', async () => {
